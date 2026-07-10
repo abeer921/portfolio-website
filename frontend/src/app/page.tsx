@@ -13,6 +13,7 @@ import ServicesAccordion from '@/components/shared/ServicesAccordion';
 import FeaturedProjectsStack from '@/components/shared/FeaturedProjectsStack';
 import { useCms } from '@/context/CmsContext';
 import { cmsDefaults } from '@/lib/cmsDefaults';
+import { normalizeHeroSettings } from '@/lib/heroContent';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -78,17 +79,19 @@ export default function Home() {
     { value: `${Math.max(displayTestimonials.length, 5)}+`, label: 'Clients Worldwide' },
   ];
 
+  const hero = normalizeHeroSettings(settings);
+
   return (
     <div className="landing-page theme-transition">
       <HomeGradient />
       <HeroSection
-        eyebrow={settings.heroEyebrow || 'UI/UX DESIGNER • PRODUCT DESIGNER'}
-        title={settings.heroTitle || 'Turning Ideas Into Beautiful &\nFunctional Products.'}
-        subtitle={settings.heroSubtitle || "I'm Abeer Nisar, a UI/UX Designer passionate about creating intuitive interfaces\nwhile exploring AI-powered products that combine creativity, technology, and\nmeaningful user experiences."}
-        ctaLabel={settings.heroCtaLabel || 'View My Work'}
-        ctaHref={settings.heroCtaHref || '/projects'}
-        secondaryCtaLabel={(settings as Record<string, string>).heroSecondaryCtaLabel || 'Download Resume'}
-        secondaryCtaHref={settings.resumeUrl || '/uploads/Abeer%20nisar%20resume.pdf'}
+        eyebrow={hero.heroEyebrow as string || 'UI/UX DESIGNER • PRODUCT DESIGNER'}
+        title={(hero.heroTitle as string) || cmsDefaults.settings.heroTitle}
+        subtitle={(hero.heroSubtitle as string) || cmsDefaults.settings.heroSubtitle}
+        ctaLabel={(hero.heroCtaLabel as string) || 'View My Work'}
+        ctaHref={(hero.heroCtaHref as string) || '/projects'}
+        secondaryCtaLabel={(hero.heroSecondaryCtaLabel as string) || 'Download Resume'}
+        secondaryCtaHref={(settings.resumeUrl as string) || '/uploads/Abeer%20nisar%20resume.pdf'}
       />
 
       <ServicesAccordion />

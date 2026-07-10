@@ -40,6 +40,7 @@ export default function AdminNavigation() {
     try {
       await adminFetch('/settings', { method: 'PUT', body: JSON.stringify(settings) });
       toast.success('Navigation & footer published');
+      window.dispatchEvent(new Event('cms-updated'));
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : 'Save failed');
     } finally {

@@ -59,8 +59,9 @@ export default function AdminSettings() {
 
       if (!res.ok) throw new Error();
 
-      toast.success('Site configurations updated');
+      toast.success('Site configurations updated. Homepage will refresh automatically.');
       loadSettings();
+      window.dispatchEvent(new Event('cms-updated'));
     } catch {
       toast.error('Failed to save settings');
     } finally {

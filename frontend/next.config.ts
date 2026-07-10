@@ -5,15 +5,15 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:5000/api/:path*",
+        destination: "http://localhost:5100/api/:path*",
       },
       {
         source: "/uploads/:path*",
-        destination: "http://localhost:5000/uploads/:path*",
+        destination: "http://localhost:5100/uploads/:path*",
       },
       {
         source: "/health",
-        destination: "http://localhost:5000/health",
+        destination: "http://localhost:5100/health",
       },
     ];
   },
@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
-        port: "5000",
+        port: "5100",
       },
     ],
   },

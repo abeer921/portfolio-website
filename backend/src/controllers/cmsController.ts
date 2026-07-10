@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../config/db';
+import { normalizeHeroSettings } from '../utils/heroContent';
 
 const defaultSiteContent: Record<string, unknown> = {
   'home.about': {
@@ -197,7 +198,7 @@ export const getCmsBundle = async (_req: Request, res: Response) => {
     }, {});
 
     return res.json({
-      settings,
+      settings: normalizeHeroSettings(settings as Record<string, unknown>),
       content,
       projects,
       testimonials,

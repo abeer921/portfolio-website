@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { API_BASE_URL, fallbackData } from '@/services/apiService';
 import { cmsDefaults, type CmsBundle } from '@/lib/cmsDefaults';
+import { normalizeHeroSettings } from '@/lib/heroContent';
 
 const emptyBundle: CmsBundle = {
   settings: { ...cmsDefaults.settings, ...fallbackData.settings },
@@ -41,7 +42,7 @@ export function CmsProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok) throw new Error('CMS fetch failed');
       const data = await res.json();
       setCms({
-        settings: { ...emptyBundle.settings, ...data.settings },
+        settings: normalizeHeroSettings({ ...cmsDefaults.settings, ...data.settings }),
         content: { ...cmsDefaults.content, ...data.content },
         projects: data.projects?.length ? data.projects : emptyBundle.projects,
         testimonials: data.testimonials?.length ? data.testimonials : emptyBundle.testimonials,
@@ -60,6 +61,22 @@ export function CmsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  useEffect(() => {
+    const onCmsUpdated = () => {
+      void load();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void load();
+    };
+
+    window.addEventListener('cms-updated', onCmsUpdated);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('cms-updated', onCmsUpdated);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, [load]);
 
   const getContent = useCallback(

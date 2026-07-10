@@ -19,6 +19,7 @@ app.use(helmet({
 // CORS Configuration
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:3100',
   process.env.FRONTEND_URL
 ].filter(Boolean) as string[];
 
