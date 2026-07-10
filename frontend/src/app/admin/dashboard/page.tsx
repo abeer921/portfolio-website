@@ -13,7 +13,7 @@ import {
   Clock,
   Inbox
 } from 'lucide-react';
-import { apiService, fallbackData } from '@/services/apiService';
+import { API_BASE_URL, apiService } from '@/services/apiService';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -35,7 +35,7 @@ export default function AdminDashboard() {
       // Fetch inbox messages from backend
       let msgList = [];
       try {
-        const res = await fetch('http://localhost:5000/api/messages', { headers });
+        const res = await fetch(`${API_BASE_URL}/messages`, { headers });
         if (res.ok) msgList = await res.json();
       } catch (err) {
         // Fallback simulated message
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
   const markAsRead = async (id: string) => {
     try {
       const token = localStorage.getItem('admin_token');
-      const res = await fetch(`http://localhost:5000/api/messages/${id}/read`, {
+      const res = await fetch(`${API_BASE_URL}/messages/${id}/read`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -101,7 +101,7 @@ export default function AdminDashboard() {
   const deleteMessage = async (id: string) => {
     try {
       const token = localStorage.getItem('admin_token');
-      const res = await fetch(`http://localhost:5000/api/messages/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/messages/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
   };
 
   const cards = [
-    { name: 'Projects', count: stats.projects, icon: Briefcase, color: 'text-[#d4af37]' },
+    { name: 'Projects', count: stats.projects, icon: Briefcase, color: 'text-[#8B5CF6]' },
     { name: 'Blog Posts', count: stats.blogs, icon: BookOpen, color: 'text-blue-400' },
     { name: 'Inbox Messages', count: stats.messages, icon: Mail, color: 'text-emerald-400' },
     { name: 'Unread Items', count: stats.unreadMessages, icon: Inbox, color: 'text-rose-400' },
@@ -162,7 +162,7 @@ export default function AdminDashboard() {
                   className={`p-5 rounded-xl border transition-all duration-350 ${
                     msg.isRead 
                       ? 'bg-zinc-950/40 border-zinc-900/60' 
-                      : 'bg-zinc-900/10 border-[#d4af37]/20 shadow-md shadow-[#d4af37]/2'
+                      : 'bg-zinc-900/10 border-[#8B5CF6]/20 shadow-md shadow-[#8B5CF6]/2'
                   }`}
                 >
                   <div className="flex justify-between items-start gap-4 mb-2.5">
@@ -189,7 +189,7 @@ export default function AdminDashboard() {
                     {!msg.isRead && (
                       <button
                         onClick={() => markAsRead(msg.id)}
-                        className="px-3 py-1.5 rounded-lg bg-[#d4af37]/10 hover:bg-[#d4af37]/20 text-[#d4af37] text-[10px] font-bold uppercase flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-lg bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 text-[#8B5CF6] text-[10px] font-bold uppercase flex items-center gap-1"
                       >
                         <MailOpen className="w-3 h-3" /> Mark Read
                       </button>

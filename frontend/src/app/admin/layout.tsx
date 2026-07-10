@@ -3,26 +3,37 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  BookOpen, 
-  Settings, 
-  Mail, 
-  Award, 
-  Layers, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  BookOpen,
   LogOut,
-  User,
-  Sliders,
-  ChevronRight
+  FileText,
+  Image as ImageIcon,
+  Layers,
+  MessageSquare,
+  Wrench,
+  GraduationCap,
+  Award,
+  ExternalLink,
+  Menu,
+  X,
+  Sparkles,
 } from 'lucide-react';
+import { ObermannLogo } from '@/components/ui/ObermannMark';
 
 const sidebarItems = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Page Content', path: '/admin/home-content', icon: FileText },
   { name: 'Projects', path: '/admin/projects', icon: Briefcase },
+  { name: 'Services', path: '/admin/services', icon: Wrench },
+  { name: 'Testimonials', path: '/admin/testimonials', icon: MessageSquare },
+  { name: 'Experience', path: '/admin/experiences', icon: Layers },
+  { name: 'Education', path: '/admin/education', icon: GraduationCap },
+  { name: 'Certificates', path: '/admin/certificates', icon: Award },
+  { name: 'Skills', path: '/admin/skills', icon: Sparkles },
+  { name: 'Media Library', path: '/admin/media', icon: ImageIcon },
   { name: 'Blogs', path: '/admin/blogs', icon: BookOpen },
-  { name: 'Messages', path: '/admin/messages', icon: Mail },
-  { name: 'Core Settings', path: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -30,8 +41,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isLoginPage = pathname === '/admin/login';
+  const activeItem = sidebarItems.find((item) => pathname === item.path);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -54,6 +67,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     checkAuth();
   }, [pathname, isLoginPage, router]);
 
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_user');
@@ -62,83 +79,114 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <span className="text-zinc-500 font-mono text-xs animate-pulse">VERIFYING SESSION STATE...</span>
+      <div className="admin-shell flex min-h-screen items-center justify-center">
+        <span className="admin-eyebrow animate-pulse">Verifying session…</span>
       </div>
     );
   }
 
   if (!authorized) return null;
 
-  // Render clean for Login Page
   if (isLoginPage) {
     return <>{children}</>;
   }
 
-  return (
-    <div className="min-h-screen bg-[#060608] flex text-zinc-300">
-      {/* Admin Sidebar */}
-      <aside className="w-64 border-r border-zinc-900 bg-[#09090b] flex flex-col justify-between p-6 fixed top-0 bottom-0 left-0 z-30">
-        <div>
-          <div className="flex items-center gap-2 mb-10 pb-4 border-b border-zinc-900">
-            <div className="w-8 h-8 rounded-lg bg-[#d4af37] flex items-center justify-center text-black font-display font-black text-sm">
-              AN
-            </div>
-            <div>
-              <span className="text-white text-sm font-semibold block">Abeer Nisar</span>
-              <span className="text-zinc-500 text-[10px] uppercase tracking-wider block">CMS Panel</span>
-            </div>
+  const SidebarContent = () => (
+    <>
+      <div className="mb-8 border-b border-[rgba(255,255,255,0.08)] pb-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#8B5CF6] to-[#6D28D9] text-white shadow-[0_10px_30px_rgba(139,92,246,0.35)]">
+            <ObermannLogo size={16} />
           </div>
-
-          <nav className="space-y-1.5">
-            {sidebarItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className={`flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-colors duration-200 ${
-                    isActive
-                      ? 'bg-[#d4af37] text-black font-bold'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4 shrink-0" />
-                    {item.name}
-                  </div>
-                  {isActive && <ChevronRight className="w-3.5 h-3.5" />}
-                </Link>
-              );
-            })}
-          </nav>
+          <div>
+            <span className="block font-display text-sm font-semibold text-white">Abeer Nisar</span>
+            <span className="admin-eyebrow">Content Studio</span>
+          </div>
         </div>
+      </div>
 
+      <nav className="flex-1 space-y-1 overflow-y-auto">
+        {sidebarItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              href={item.path}
+              className={`admin-nav-link ${isActive ? 'active' : ''}`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              {item.name}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="mt-6 space-y-2 border-t border-[rgba(255,255,255,0.08)] pt-6">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="admin-btn-ghost w-full justify-center"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+          Preview Site
+        </a>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors duration-200"
+          className="admin-nav-link w-full text-[#EC4899] hover:bg-[rgba(236,72,153,0.08)] hover:text-[#EC4899]"
         >
-          <LogOut className="w-4 h-4" />
-          Logout Session
+          <LogOut className="h-4 w-4" />
+          Logout
         </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="admin-shell relative flex min-h-screen">
+      {/* Desktop sidebar */}
+      <aside className="admin-sidebar fixed inset-y-0 left-0 z-30 hidden w-64 flex-col p-6 lg:flex">
+        <SidebarContent />
       </aside>
 
-      {/* Main Content Area */}
-      <div className="pl-64 w-full flex flex-col min-h-screen">
-        {/* Top Navbar */}
-        <header className="h-16 border-b border-zinc-900 bg-[#09090b]/50 backdrop-blur-md px-8 flex items-center justify-between sticky top-0 z-20">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-            {pathname?.split('/').pop()} Panel
-          </h2>
-          <div className="flex items-center gap-3 text-xs">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-zinc-500">Connected to Database (Neon)</span>
-          </div>
-        </header>
+      {/* Mobile sidebar overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+          />
+          <aside className="admin-sidebar absolute inset-y-0 left-0 flex w-72 flex-col p-6 shadow-2xl">
+            <div className="mb-4 flex justify-end">
+              <button type="button" onClick={() => setMobileOpen(false)} className="text-[#9B99A8] hover:text-white">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <SidebarContent />
+          </aside>
+        </div>
+      )}
 
-        {/* Dynamic Inner Page Content */}
-        <main className="p-8 flex-1 max-w-7xl w-full mx-auto">
+      <div className="relative z-10 flex w-full flex-col lg:pl-64">
+        {/* Minimal mobile bar — not a full header */}
+        <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] px-4 py-4 lg:hidden">
+          <button type="button" onClick={() => setMobileOpen(true)} className="text-white">
+            <Menu className="h-5 w-5" />
+          </button>
+          <span className="font-display text-sm font-semibold text-white">
+            {activeItem?.name || 'Admin'}
+          </span>
+          <div className="w-5" />
+        </div>
+
+        <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6 lg:p-10">
+          <div className="mb-8 hidden lg:block">
+            <p className="admin-eyebrow mb-1">CMS</p>
+            <h1 className="admin-page-title">{activeItem?.name || 'Dashboard'}</h1>
+          </div>
           {children}
         </main>
       </div>

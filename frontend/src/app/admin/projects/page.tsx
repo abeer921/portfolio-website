@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { Plus, Edit2, Trash2, X, Check, Save } from 'lucide-react';
-import { apiService, fallbackData } from '@/services/apiService';
+import { Plus, Edit2, Trash2, X, Save } from 'lucide-react';
+import { API_BASE_URL, apiService } from '@/services/apiService';
 import MagneticButton from '@/components/ui/MagneticButton';
+import ReorderList from '@/components/admin/ReorderList';
+import ImageUpload from '@/components/admin/ImageUpload';
+import { reorderItems } from '@/services/adminService';
 
 export default function AdminProjects() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -17,6 +20,8 @@ export default function AdminProjects() {
     techStack: [],
     problem: '',
     solution: '',
+    caseStudy: '',
+    designProcess: '',
     images: [''],
     liveDemo: '',
     figma: '',
@@ -78,8 +83,8 @@ export default function AdminProjects() {
     const token = localStorage.getItem('admin_token');
     const method = currentProject.id ? 'PUT' : 'POST';
     const url = currentProject.id 
-      ? `http://localhost:5000/api/projects/${currentProject.id}` 
-      : 'http://localhost:5000/api/projects';
+      ? `${API_BASE_URL}/projects/${currentProject.id}` 
+      : `${API_BASE_URL}/projects`;
 
     try {
       const res = await fetch(url, {
@@ -96,15 +101,8 @@ export default function AdminProjects() {
       toast.success(currentProject.id ? 'Project updated successfully' : 'Project created successfully');
       setIsEditing(false);
       loadProjects();
-    } catch {
-      // Simulate success for offline review mode
-      if (currentProject.id) {
-        setProjects((prev) => prev.map((p) => (p.id === currentProject.id ? currentProject : p)));
-      } else {
-        setProjects((prev) => [...prev, { ...currentProject, id: `p-${Date.now()}` }]);
-      }
-      toast.success('Offline simulated save success');
-      setIsEditing(false);
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to save project');
     }
   };
 
@@ -113,7 +111,7 @@ export default function AdminProjects() {
     
     const token = localStorage.getItem('admin_token');
     try {
-      const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/projects/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -123,9 +121,34 @@ export default function AdminProjects() {
       toast.success('Project deleted successfully');
       loadProjects();
     } catch {
-      setProjects((prev) => prev.filter((p) => p.id !== id));
-      toast.success('Offline simulated delete success');
+      toast.error('Failed to delete project');
     }
+  };
+
+  const handleReorder = async (ordered: any[]) => {
+    setProjects(ordered);
+    try {
+      await reorderItems('projects', ordered.map((p, i) => ({ id: p.id, position: i })));
+      toast.success('Project order saved');
+    } catch {
+      toast.error('Failed to save order');
+      loadProjects();
+    }
+  };
+
+  const addImage = () => {
+    setCurrentProject({ ...currentProject, images: [...(currentProject.images || []), ''] });
+  };
+
+  const updateImage = (index: number, url: string) => {
+    const images = [...(currentProject.images || [])];
+    images[index] = url;
+    setCurrentProject({ ...currentProject, images });
+  };
+
+  const removeImage = (index: number) => {
+    const images = (currentProject.images || []).filter((_: string, i: number) => i !== index);
+    setCurrentProject({ ...currentProject, images: images.length ? images : [''] });
   };
 
   return (
@@ -134,60 +157,33 @@ export default function AdminProjects() {
         <h3 className="font-display font-bold text-white text-base">Manage Projects</h3>
         <MagneticButton
           onClick={handleNewClick}
-          className="px-4 py-2 bg-[#d4af37] text-black text-xs font-bold uppercase rounded-full flex items-center gap-1.5 shadow-md shadow-[#d4af37]/15"
+          className="px-4 py-2 bg-[#8B5CF6] text-black text-xs font-bold uppercase rounded-full flex items-center gap-1.5 shadow-md shadow-[#8B5CF6]/15"
         >
           <Plus className="w-4 h-4" /> Add Project
         </MagneticButton>
       </div>
 
-      {/* Projects Table List */}
-      <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 shadow-xl overflow-x-auto">
+      {/* Projects List with drag reorder */}
+      <div className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 shadow-xl">
         {loading ? (
           <div className="text-center py-10 text-zinc-500 animate-pulse text-xs uppercase">Loading projects...</div>
         ) : (
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-zinc-900 text-zinc-500 uppercase tracking-wider">
-                <th className="pb-3 pr-4 font-semibold">Title</th>
-                <th className="pb-3 px-4 font-semibold">Category</th>
-                <th className="pb-3 px-4 font-semibold">Client</th>
-                <th className="pb-3 px-4 font-semibold text-center">Featured</th>
-                <th className="pb-3 pl-4 font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-900 text-zinc-300">
-              {projects.map((proj) => (
-                <tr key={proj.id} className="group hover:bg-zinc-900/10 transition-colors duration-150">
-                  <td className="py-4 pr-4 font-semibold text-white">{proj.title}</td>
-                  <td className="py-4 px-4 text-zinc-400">{proj.category}</td>
-                  <td className="py-4 px-4 text-zinc-400">{proj.client || 'Personal'}</td>
-                  <td className="py-4 px-4 text-center">
-                    {proj.featured ? (
-                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-500/10 text-green-500">
-                        <Check className="w-3.5 h-3.5" />
-                      </span>
-                    ) : (
-                      <span className="text-zinc-600">-</span>
-                    )}
-                  </td>
-                  <td className="py-4 pl-4 text-right space-x-2">
-                    <button
-                      onClick={() => handleEditClick(proj)}
-                      className="p-2 rounded-lg bg-zinc-900 hover:bg-[#d4af37]/20 hover:text-[#d4af37] text-zinc-400 transition-colors duration-200"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(proj.id)}
-                      className="p-2 rounded-lg bg-zinc-900 hover:bg-rose-500/20 hover:text-rose-500 text-zinc-400 transition-colors duration-200"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ReorderList
+            items={projects}
+            onReorder={handleReorder}
+            renderItem={(proj) => (
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="font-semibold text-white truncate">{proj.title}</p>
+                  <p className="text-xs text-zinc-500">{proj.category} · {proj.client || 'Personal'}{proj.featured ? ' · Featured' : ''}</p>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={() => handleEditClick(proj)} className="p-2 rounded-lg bg-zinc-900 hover:bg-[#8B5CF6]/20 hover:text-[#8B5CF6] text-zinc-400"><Edit2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => handleDelete(proj.id)} className="p-2 rounded-lg bg-zinc-900 hover:bg-rose-500/20 hover:text-rose-500 text-zinc-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                </div>
+              </div>
+            )}
+          />
         )}
       </div>
 
@@ -216,7 +212,7 @@ export default function AdminProjects() {
                       type="text"
                       value={currentProject.title}
                       onChange={(e) => setCurrentProject({ ...currentProject, title: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                       required
                     />
                   </div>
@@ -225,7 +221,7 @@ export default function AdminProjects() {
                     <select
                       value={currentProject.category}
                       onChange={(e) => setCurrentProject({ ...currentProject, category: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     >
                       <option>UI/UX Design</option>
                       <option>Web Design</option>
@@ -241,20 +237,20 @@ export default function AdminProjects() {
                     rows={3}
                     value={currentProject.description}
                     onChange={(e) => setCurrentProject({ ...currentProject, description: e.target.value })}
-                    className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all resize-none"
+                    className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all resize-none"
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[#d4af37] font-semibold mb-2 uppercase">Tech Stack (comma separated)</label>
+                    <label className="block text-[#8B5CF6] font-semibold mb-2 uppercase">Tech Stack (comma separated)</label>
                     <input
                       type="text"
                       value={Array.isArray(currentProject.techStack) ? currentProject.techStack.join(', ') : ''}
                       onChange={(e) => setCurrentProject({ ...currentProject, techStack: e.target.value.split(',').map((t: string) => t.trim()) })}
                       placeholder="Figma, React, Node"
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     />
                   </div>
                   <div>
@@ -263,7 +259,7 @@ export default function AdminProjects() {
                       type="text"
                       value={currentProject.duration || ''}
                       onChange={(e) => setCurrentProject({ ...currentProject, duration: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     />
                   </div>
                 </div>
@@ -275,7 +271,7 @@ export default function AdminProjects() {
                       type="text"
                       value={currentProject.client || ''}
                       onChange={(e) => setCurrentProject({ ...currentProject, client: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     />
                   </div>
                   <div>
@@ -283,7 +279,7 @@ export default function AdminProjects() {
                     <select
                       value={currentProject.status}
                       onChange={(e) => setCurrentProject({ ...currentProject, status: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     >
                       <option>Completed</option>
                       <option>In Progress</option>
@@ -298,7 +294,7 @@ export default function AdminProjects() {
                       type="text"
                       value={currentProject.figma || ''}
                       onChange={(e) => setCurrentProject({ ...currentProject, figma: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     />
                   </div>
                   <div>
@@ -307,7 +303,7 @@ export default function AdminProjects() {
                       type="text"
                       value={currentProject.github || ''}
                       onChange={(e) => setCurrentProject({ ...currentProject, github: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     />
                   </div>
                   <div>
@@ -316,7 +312,7 @@ export default function AdminProjects() {
                       type="text"
                       value={currentProject.liveDemo || ''}
                       onChange={(e) => setCurrentProject({ ...currentProject, liveDemo: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     />
                   </div>
                 </div>
@@ -328,7 +324,7 @@ export default function AdminProjects() {
                       rows={3}
                       value={currentProject.problem || ''}
                       onChange={(e) => setCurrentProject({ ...currentProject, problem: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all resize-none"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all resize-none"
                     />
                   </div>
                   <div>
@@ -337,9 +333,46 @@ export default function AdminProjects() {
                       rows={3}
                       value={currentProject.solution || ''}
                       onChange={(e) => setCurrentProject({ ...currentProject, solution: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all resize-none"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all resize-none"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-zinc-500 font-semibold mb-2 uppercase">Case Study</label>
+                  <textarea
+                    rows={4}
+                    value={currentProject.caseStudy || ''}
+                    onChange={(e) => setCurrentProject({ ...currentProject, caseStudy: e.target.value })}
+                    className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-zinc-500 font-semibold mb-2 uppercase">Design Process</label>
+                  <textarea
+                    rows={3}
+                    value={currentProject.designProcess || ''}
+                    onChange={(e) => setCurrentProject({ ...currentProject, designProcess: e.target.value })}
+                    className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all resize-none"
+                  />
+                </div>
+
+                <div className="border-t border-zinc-900 pt-5 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <label className="text-zinc-500 font-semibold uppercase">Project Images</label>
+                    <button type="button" onClick={addImage} className="text-[#8B5CF6] text-[10px] font-bold uppercase">+ Add Image</button>
+                  </div>
+                  {(currentProject.images || ['']).map((img: string, idx: number) => (
+                    <div key={idx} className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <ImageUpload value={img} onChange={(url) => updateImage(idx, url)} label={`Image ${idx + 1}`} />
+                      </div>
+                      {(currentProject.images || []).length > 1 && (
+                        <button type="button" onClick={() => removeImage(idx)} className="mt-6 p-2 text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                      )}
+                    </div>
+                  ))}
                 </div>
 
                 <div className="flex items-center gap-2 border-t border-zinc-900 pt-5">
@@ -348,7 +381,7 @@ export default function AdminProjects() {
                     id="featured"
                     checked={currentProject.featured}
                     onChange={(e) => setCurrentProject({ ...currentProject, featured: e.target.checked })}
-                    className="w-4 h-4 rounded border-zinc-850 text-[#d4af37] bg-zinc-900 focus:ring-[#d4af37]"
+                    className="w-4 h-4 rounded border-zinc-850 text-[#8B5CF6] bg-zinc-900 focus:ring-[#8B5CF6]"
                   />
                   <label htmlFor="featured" className="text-white font-semibold uppercase">Feature on Home Page</label>
                 </div>
@@ -364,7 +397,7 @@ export default function AdminProjects() {
               </button>
               <button
                 onClick={handleFormSubmit}
-                className="px-5 py-2.5 rounded-xl bg-[#d4af37] hover:bg-[#bda02b] text-black font-bold uppercase text-[10px] flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-xl bg-[#8B5CF6] hover:bg-[#C084FC] text-black font-bold uppercase text-[10px] flex items-center gap-1.5"
               >
                 <Save className="w-3.5 h-3.5" /> Save Project
               </button>

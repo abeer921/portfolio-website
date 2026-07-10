@@ -1,11 +1,15 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 // Fallback Resume Data for Abeer Nisar if Backend API is down/unreachable
 export const fallbackData = {
   settings: {
-    heroTitle: 'Designing Interfaces that Feel Natural, Experiences that Matter.',
-    heroSubtitle: 'UI/UX Designer & Content Developer crafting premium, pixel-perfect interfaces for web and mobile. Passionate about design systems, visual hierarchy, and intuitive user flows.',
-    resumeUrl: 'https://raw.githubusercontent.com/abeernisar/resume/main/resume.pdf',
+    heroTitle: 'Turning Ideas Into Beautiful &\nFunctional Products.',
+    heroSubtitle: "I'm Abeer Nisar, a UI/UX Designer passionate about creating intuitive interfaces\nwhile exploring AI-powered products that combine creativity, technology, and\nmeaningful user experiences.",
+    heroEyebrow: 'UI/UX DESIGNER • PRODUCT DESIGNER',
+    heroCtaLabel: 'View My Work',
+    heroCtaHref: '/projects',
+    heroSecondaryCtaLabel: 'Download Resume',
+    resumeUrl: '/uploads/Abeer%20nisar%20resume.pdf',
     contactEmail: 'abeernisar11@gmail.com',
     contactPhone: '+92 302 4115583',
     contactLocation: 'Lahore, Pakistan',
@@ -353,17 +357,23 @@ export const apiService = {
   },
 
   submitContactMessage: async (data: { name: string; email: string; subject?: string; message: string }) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      return await res.json();
-    } catch (error) {
-      console.warn('API message submit failed. Simulating local success.', error);
-      return { status: 'success', message: 'Message sent successfully' };
+    const res = await fetch(`${API_BASE_URL}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: data.name.trim(),
+        email: data.email.trim(),
+        subject: data.subject?.trim(),
+        message: data.message.trim(),
+      }),
+    });
+
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(payload.message || 'Failed to submit message');
     }
+
+    return payload;
   },
 
   submitBlogComment: async (blogId: string, data: { authorName: string; authorEmail: string; content: string }) => {

@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { Lock, Mail, ArrowRight } from 'lucide-react';
-import MagneticButton from '@/components/ui/MagneticButton';
+import { ObermannLogo } from '@/components/ui/ObermannMark';
+import { API_BASE_URL } from '@/services/apiService';
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function AdminLogin() {
 
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -34,83 +35,73 @@ export default function AdminLogin() {
         throw new Error(data.message || 'Invalid credentials');
       }
 
-      // Save credentials locally
       localStorage.setItem('admin_token', data.token);
       localStorage.setItem('admin_user', JSON.stringify(data.user));
 
-      toast.success('Session authenticated successfully');
+      toast.success('Welcome back');
       router.push('/admin/dashboard');
-    } catch (err: any) {
-      console.warn('API Authentication failed. Simulating local auth bypass for review.', err);
-      
-      // Developer bypass for inspection mode if the backend server is offline:
-      if (email === 'abeernisar11@gmail.com' && password === 'Abeer@UX2026') {
-        localStorage.setItem('admin_token', 'offline_mock_dev_session_token_2026');
-        localStorage.setItem('admin_user', JSON.stringify({ email }));
-        toast.success('Offline Dev Session active');
-        router.push('/admin/dashboard');
-      } else {
-        toast.error(err.message || 'Invalid admin credentials');
-      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Invalid admin credentials';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] flex items-center justify-center relative px-6">
-      {/* Glow highlight background */}
-      <div className="glow-spot top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30 z-0" />
-      <div className="absolute inset-0 dot-bg opacity-30 pointer-events-none z-0" />
+    <div className="admin-shell relative flex min-h-screen items-center justify-center px-6">
+      <div className="glow-spot pointer-events-none absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 opacity-30" />
+      <div className="dot-bg pointer-events-none absolute inset-0 z-0 opacity-20" />
 
-      <div className="w-full max-w-md rounded-2xl glass-panel p-8 relative z-10 shadow-2xl">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-[#d4af37] text-black font-display font-black text-lg flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#d4af37]/15">
-            AN
+      <div className="admin-card relative z-10 w-full max-w-md p-8 sm:p-10">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#8B5CF6] to-[#6D28D9] text-white shadow-[0_10px_30px_rgba(139,92,246,0.35)]">
+            <ObermannLogo size={20} />
           </div>
-          <h1 className="font-display font-bold text-2xl text-white tracking-tight">Admin Vault</h1>
-          <p className="text-zinc-500 text-xs mt-2">Authenticated credentials required</p>
+          <p className="admin-eyebrow mb-2">Content Studio</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-white">Sign in</h1>
+          <p className="mt-2 text-sm text-[#9B99A8]">Manage your portfolio content</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-zinc-500 text-xs font-semibold mb-2 uppercase">Email Address</label>
-            <div className="relative flex items-center">
-              <Mail className="absolute left-4 w-4 h-4 text-zinc-600" />
+            <label className="admin-eyebrow mb-2 block">Email</label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9B99A8]" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="abeernisar11@gmail.com"
-                className="w-full bg-zinc-900/40 border border-zinc-850 text-zinc-300 pl-11 pr-4 py-3 rounded-xl text-sm outline-none focus:border-[#d4af37] transition-all duration-200"
+                className="admin-input pl-11"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-zinc-500 text-xs font-semibold mb-2 uppercase">Password</label>
-            <div className="relative flex items-center">
-              <Lock className="absolute left-4 w-4 h-4 text-zinc-600" />
+            <label className="admin-eyebrow mb-2 block">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9B99A8]" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-zinc-900/40 border border-zinc-850 text-zinc-300 pl-11 pr-4 py-3 rounded-xl text-sm outline-none focus:border-[#d4af37] transition-all duration-200"
+                className="admin-input pl-11"
                 required
               />
             </div>
           </div>
 
-          <MagneticButton
+          <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 bg-[#d4af37] hover:bg-[#bda02b] text-black font-semibold rounded-xl flex items-center justify-center gap-2 text-xs uppercase tracking-wider transition-colors duration-300"
+            className="admin-btn-primary w-full justify-center py-3.5 disabled:opacity-50"
           >
-            {loading ? 'Authenticating...' : 'Enter Vault'}
-            <ArrowRight className="w-4 h-4" />
-          </MagneticButton>
+            {loading ? 'Signing in…' : 'Enter Studio'}
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </form>
       </div>
     </div>

@@ -38,9 +38,13 @@ async function main() {
   const settings = await prisma.settings.create({
     data: {
       id: 'global',
-      heroTitle: 'Designing Interfaces that Feel Natural, Experiences that Matter.',
-      heroSubtitle: 'UI/UX Designer & Content Developer crafting premium, pixel-perfect interfaces for web and mobile. Passionate about design systems, visual hierarchy, and intuitive user flows.',
-      resumeUrl: 'https://raw.githubusercontent.com/abeernisar/resume/main/resume.pdf',
+      heroEyebrow: 'UI/UX DESIGNER • PRODUCT DESIGNER',
+      heroTitle: 'Turning Ideas Into Beautiful &\nFunctional Products.',
+      heroSubtitle: "I'm Abeer Nisar, a UI/UX Designer passionate about creating intuitive interfaces\nwhile exploring AI-powered products that combine creativity, technology, and\nmeaningful user experiences.",
+      heroCtaLabel: 'View My Work',
+      heroCtaHref: '/projects',
+      heroSecondaryCtaLabel: 'Download Resume',
+      resumeUrl: '/uploads/Abeer%20nisar%20resume.pdf',
       contactEmail: 'abeernisar11@gmail.com',
       contactPhone: '+92 302 4115583',
       contactLocation: 'Lahore, Pakistan',

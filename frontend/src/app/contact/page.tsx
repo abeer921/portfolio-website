@@ -1,12 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle2 } from 'lucide-react';
-import { apiService, fallbackData } from '@/services/apiService';
+import { apiService } from '@/services/apiService';
 import MagneticButton from '@/components/ui/MagneticButton';
+import { useCms } from '@/context/CmsContext';
 
 export default function Contact() {
+  const { cms, getContent } = useCms();
+  const settings = cms.settings as Record<string, string>;
+  const page = getContent<{
+    greeting?: string;
+    heading?: string;
+    intro?: string;
+    formPlaceholder?: string;
+    successHeading?: string;
+    successBody?: string;
+    successCta?: string;
+  }>('contact.page');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
@@ -16,188 +28,100 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!name.trim() || !email.trim() || !message.trim()) {
       toast.error('Please fill in Name, Email and Message');
       return;
     }
-
     try {
       setSubmitting(true);
-      await apiService.submitContactMessage({
-        name,
-        email,
-        subject,
-        message,
-      });
-
+      await apiService.submitContactMessage({ name, email, subject, message });
       setSuccess(true);
       toast.success('Message sent successfully!');
-      
-      // Clear fields
-      setName('');
-      setEmail('');
-      setSubject('');
-      setMessage('');
-    } catch (error) {
-      toast.error('Failed to submit. Please try again.');
+      setName(''); setEmail(''); setSubject(''); setMessage('');
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Failed to submit. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
   const contactInfo = [
-    {
-      title: 'Email Direct',
-      value: fallbackData.settings.contactEmail,
-      href: `mailto:${fallbackData.settings.contactEmail}`,
-      icon: Mail,
-    },
-    {
-      title: 'Phone / Whatsapp',
-      value: fallbackData.settings.contactPhone,
-      href: `tel:${fallbackData.settings.contactPhone}`,
-      icon: Phone,
-    },
-    {
-      title: 'Work Location',
-      value: fallbackData.settings.contactLocation,
-      icon: MapPin,
-    },
-    {
-      title: 'Studio Hours',
-      value: fallbackData.settings.workingHours,
-      icon: Clock,
-    },
+    { title: 'Email', value: settings.contactEmail, href: `mailto:${settings.contactEmail}`, icon: Mail },
+    { title: 'Phone', value: settings.contactPhone, href: `tel:${settings.contactPhone?.replace(/\s/g, '')}`, icon: Phone },
+    { title: 'Location', value: settings.contactLocation, icon: MapPin },
+    { title: 'Hours', value: settings.workingHours, icon: Clock },
   ];
 
   return (
-    <div className="relative pt-32 pb-24 overflow-hidden min-h-screen">
-      {/* Background glow spots */}
-      <div className="glow-spot top-[15%] left-[10%] opacity-20" />
-      <div className="glow-spot bottom-[15%] right-[10%] opacity-25" />
-
-      {/* Grid Dot Background */}
-      <div className="absolute inset-0 dot-bg opacity-30 z-0 pointer-events-none" />
-
-      <div className="mx-auto max-w-7xl px-6 md:px-12 relative z-10">
-        
-        {/* Header Title */}
-        <section className="mb-20">
-          <span className="text-[#d4af37] text-xs font-semibold tracking-wider uppercase mb-2 block">GET IN TOUCH</span>
-          <h1 className="font-display font-black text-4xl sm:text-6xl text-white tracking-tight mb-6">
-            Let's Collaborate<span className="text-[#d4af37]">.</span>
-          </h1>
-          <p className="text-zinc-500 text-lg leading-relaxed max-w-2xl">
-            Have an interesting product, dashboard redesign, or design system project? Drop a line and let's craft something premium.
+    <div className="min-h-screen bg-theme theme-transition pb-24 pt-32">
+      <div className="mx-auto max-w-7xl px-6 md:px-12">
+        <section className="mb-16 max-w-2xl">
+          <p className="mb-2 text-sm text-[var(--muted-foreground)]">{page.greeting || 'Hi'}</p>
+          <h1 className="portavia-hero-word !text-[clamp(2.5rem,8vw,5rem)] mb-6">{page.heading || "Let's work together"}</h1>
+          <p className="text-[var(--muted-foreground)]">
+            {page.intro || "Have a project in mind? Let's build something impactful — whether it's your brand, your website, or your next big idea."}
           </p>
         </section>
 
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-          {/* Left Column: Contact Cards */}
-          <div className="lg:col-span-5 space-y-6">
+        <section className="grid gap-12 lg:grid-cols-12">
+          <div className="space-y-4 lg:col-span-4">
             {contactInfo.map((info, idx) => {
               const Icon = info.icon;
               return (
-                <div key={idx} className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 flex items-center gap-5 hover:border-zinc-800 transition-colors duration-300">
-                  <div className="w-11 h-11 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[#d4af37]">
-                    <Icon className="w-4 h-4" />
+                <div key={idx} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+                  <div className="mb-2 flex items-center gap-2 text-xs text-[#999]">
+                    <Icon className="h-3.5 w-3.5" /> {info.title}
                   </div>
-                  <div>
-                    <span className="text-zinc-500 text-[10px] tracking-wider uppercase block mb-1">{info.title}</span>
-                    {info.href ? (
-                      <a href={info.href} className="text-white hover:text-[#d4af37] text-sm font-semibold transition-colors duration-200">
-                        {info.value}
-                      </a>
-                    ) : (
-                      <span className="text-white text-sm font-semibold">{info.value}</span>
-                    )}
-                  </div>
+                  {info.href ? (
+                    <a href={info.href} className="text-sm font-medium hover:underline">{info.value}</a>
+                  ) : (
+                    <span className="text-sm font-medium">{info.value}</span>
+                  )}
                 </div>
               );
             })}
           </div>
 
-          {/* Right Column: Contact Form */}
-          <div className="lg:col-span-7 p-8 rounded-2xl bg-zinc-950 border border-zinc-900 relative">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8 lg:col-span-8">
             {success ? (
-              <div className="py-16 text-center flex flex-col items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-[#d4af37]/10 flex items-center justify-center text-[#d4af37] mb-6">
-                  <CheckCircle2 className="w-8 h-8" />
+              <div className="flex flex-col items-center py-16 text-center">
+                <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-black/5">
+                  <CheckCircle2 className="h-7 w-7" />
                 </div>
-                <h3 className="font-display font-bold text-2xl text-white mb-2">Message Dispatched</h3>
-                <p className="text-zinc-500 text-sm max-w-xs leading-relaxed mb-8">
-                  Thank you for reaching out! Your inquiry was successfully recorded. I will check my inbox and get back to you shortly.
-                </p>
-                <MagneticButton
-                  onClick={() => setSuccess(false)}
-                  className="px-6 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-white text-white text-xs font-semibold uppercase rounded-full transition-colors duration-300"
-                >
+                <h3 className="mb-2 text-xl font-semibold">Message sent!</h3>
+                <p className="mb-8 max-w-xs text-sm text-[var(--muted-foreground)]">Thank you for reaching out. I&apos;ll get back to you shortly.</p>
+                <MagneticButton onClick={() => setSuccess(false)} className="btn-secondary px-6 py-3 text-sm">
                   Send another message
                 </MagneticButton>
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
-                <h3 className="font-display font-bold text-lg text-white mb-8">Inquiry Form</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <h3 className="mb-8 text-lg font-semibold">Send a message</h3>
+                <div className="mb-5 grid gap-5 md:grid-cols-2">
                   <div>
-                    <label className="block text-zinc-500 text-xs font-semibold mb-2 uppercase">Full Name</label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-zinc-900/40 border border-zinc-850 focus:border-[#d4af37] text-zinc-300 px-4 py-3 rounded-xl text-sm outline-none transition-colors duration-200"
-                      required
-                    />
+                    <label className="mb-2 block text-xs text-[#999]">Full Name</label>
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-theme theme-transition px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" required />
                   </div>
                   <div>
-                    <label className="block text-zinc-500 text-xs font-semibold mb-2 uppercase">Email Address</label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-zinc-900/40 border border-zinc-850 focus:border-[#d4af37] text-zinc-300 px-4 py-3 rounded-xl text-sm outline-none transition-colors duration-200"
-                      required
-                    />
+                    <label className="mb-2 block text-xs text-[#999]">Email</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-theme theme-transition px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" required />
                   </div>
                 </div>
-
-                <div className="mb-6">
-                  <label className="block text-zinc-500 text-xs font-semibold mb-2 uppercase">Subject</label>
-                  <input
-                    type="text"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    className="w-full bg-zinc-900/40 border border-zinc-850 focus:border-[#d4af37] text-zinc-300 px-4 py-3 rounded-xl text-sm outline-none transition-colors duration-200"
-                  />
+                <div className="mb-5">
+                  <label className="mb-2 block text-xs text-[#999]">Subject</label>
+                  <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-theme theme-transition px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" />
                 </div>
-
                 <div className="mb-8">
-                  <label className="block text-zinc-500 text-xs font-semibold mb-2 uppercase">Inquiry details</label>
-                  <textarea
-                    rows={5}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Describe your design needs, deadlines, or project details..."
-                    className="w-full bg-zinc-900/40 border border-zinc-850 focus:border-[#d4af37] text-zinc-300 px-4 py-3 rounded-xl text-sm outline-none transition-colors duration-200 resize-none placeholder:text-zinc-700"
-                    required
-                  />
+                  <label className="mb-2 block text-xs text-[#999]">Message</label>
+                  <textarea rows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Tell me about your project..." className="w-full resize-none rounded-xl border border-[var(--border)] bg-theme theme-transition px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" required />
                 </div>
-
-                <MagneticButton
-                  type="submit"
-                  disabled={submitting}
-                  className="px-8 py-3.5 bg-[#d4af37] hover:bg-[#bda02b] text-black text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-2 transition-colors duration-300"
-                >
-                  {submitting ? 'Dispatching...' : 'Dispatch Message'}
-                  <Send className="w-3.5 h-3.5" />
+                <MagneticButton type="submit" disabled={submitting} className="btn-primary px-8 py-3.5 text-sm">
+                  {submitting ? 'Sending...' : 'Send message'} <Send className="h-3.5 w-3.5" />
                 </MagneticButton>
               </form>
             )}
           </div>
         </section>
-
       </div>
     </div>
   );

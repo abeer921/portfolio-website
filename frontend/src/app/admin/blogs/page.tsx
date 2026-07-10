@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Plus, Edit2, Trash2, X, Save } from 'lucide-react';
-import { apiService } from '@/services/apiService';
+import { API_BASE_URL, apiService } from '@/services/apiService';
 import MagneticButton from '@/components/ui/MagneticButton';
 
 export default function AdminBlogs() {
@@ -22,10 +22,16 @@ export default function AdminBlogs() {
   const loadBlogs = async () => {
     try {
       setLoading(true);
-      const data = await apiService.getBlogs();
+      const token = localStorage.getItem('admin_token');
+      const res = await fetch(`${API_BASE_URL}/blogs/admin/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
       setBlogs(data);
     } catch (error) {
       console.error('Error loading blogs:', error);
+      toast.error('Failed to load blogs');
     } finally {
       setLoading(false);
     }
@@ -61,8 +67,8 @@ export default function AdminBlogs() {
     const token = localStorage.getItem('admin_token');
     const method = currentBlog.id ? 'PUT' : 'POST';
     const url = currentBlog.id 
-      ? `http://localhost:5000/api/blogs/${currentBlog.id}` 
-      : 'http://localhost:5000/api/blogs';
+      ? `${API_BASE_URL}/blogs/${currentBlog.id}` 
+      : `${API_BASE_URL}/blogs`;
 
     try {
       const res = await fetch(url, {
@@ -96,7 +102,7 @@ export default function AdminBlogs() {
     
     const token = localStorage.getItem('admin_token');
     try {
-      const res = await fetch(`http://localhost:5000/api/blogs/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/blogs/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -117,7 +123,7 @@ export default function AdminBlogs() {
         <h3 className="font-display font-bold text-white text-base">Manage Blog Posts</h3>
         <MagneticButton
           onClick={handleNewClick}
-          className="px-4 py-2 bg-[#d4af37] text-black text-xs font-bold uppercase rounded-full flex items-center gap-1.5 shadow-md shadow-[#d4af37]/15"
+          className="px-4 py-2 bg-[#8B5CF6] text-black text-xs font-bold uppercase rounded-full flex items-center gap-1.5 shadow-md shadow-[#8B5CF6]/15"
         >
           <Plus className="w-4 h-4" /> Write Post
         </MagneticButton>
@@ -156,7 +162,7 @@ export default function AdminBlogs() {
                   <td className="py-4 pl-4 text-right space-x-2">
                     <button
                       onClick={() => handleEditClick(blog)}
-                      className="p-2 rounded-lg bg-zinc-900 hover:bg-[#d4af37]/20 hover:text-[#d4af37] text-zinc-400 transition-colors duration-200"
+                      className="p-2 rounded-lg bg-zinc-900 hover:bg-[#8B5CF6]/20 hover:text-[#8B5CF6] text-zinc-400 transition-colors duration-200"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
@@ -199,7 +205,7 @@ export default function AdminBlogs() {
                       type="text"
                       value={currentBlog.title}
                       onChange={(e) => setCurrentBlog({ ...currentBlog, title: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                       required
                     />
                   </div>
@@ -209,7 +215,7 @@ export default function AdminBlogs() {
                       type="text"
                       value={currentBlog.category}
                       onChange={(e) => setCurrentBlog({ ...currentBlog, category: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                       required
                     />
                   </div>
@@ -222,7 +228,7 @@ export default function AdminBlogs() {
                       type="text"
                       value={currentBlog.coverImage || ''}
                       onChange={(e) => setCurrentBlog({ ...currentBlog, coverImage: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     />
                   </div>
                   <div>
@@ -230,7 +236,7 @@ export default function AdminBlogs() {
                     <select
                       value={currentBlog.status}
                       onChange={(e) => setCurrentBlog({ ...currentBlog, status: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                      className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     >
                       <option value="DRAFT">DRAFT (Hidden)</option>
                       <option value="PUBLISHED">PUBLISHED (Visible)</option>
@@ -239,13 +245,13 @@ export default function AdminBlogs() {
                 </div>
 
                 <div>
-                  <label className="block text-[#d4af37] font-semibold mb-2 uppercase">Tags (comma separated)</label>
+                  <label className="block text-[#8B5CF6] font-semibold mb-2 uppercase">Tags (comma separated)</label>
                   <input
                     type="text"
                     value={Array.isArray(currentBlog.tags) ? currentBlog.tags.join(', ') : ''}
                     onChange={(e) => setCurrentBlog({ ...currentBlog, tags: e.target.value.split(',').map((t: string) => t.trim()) })}
                     placeholder="Figma, Wireframing, UX Design"
-                    className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#d4af37] transition-all"
+                    className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                   />
                 </div>
 
@@ -255,7 +261,7 @@ export default function AdminBlogs() {
                     rows={12}
                     value={currentBlog.content}
                     onChange={(e) => setCurrentBlog({ ...currentBlog, content: e.target.value })}
-                    className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-3 rounded-xl outline-none focus:border-[#d4af37] transition-all resize-none font-mono text-xs leading-relaxed"
+                    className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-3 rounded-xl outline-none focus:border-[#8B5CF6] transition-all resize-none font-mono text-xs leading-relaxed"
                     required
                   />
                 </div>
@@ -271,7 +277,7 @@ export default function AdminBlogs() {
               </button>
               <button
                 onClick={handleFormSubmit}
-                className="px-5 py-2.5 rounded-xl bg-[#d4af37] hover:bg-[#bda02b] text-black font-bold uppercase text-[10px] flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-xl bg-[#8B5CF6] hover:bg-[#C084FC] text-black font-bold uppercase text-[10px] flex items-center gap-1.5"
               >
                 <Save className="w-3.5 h-3.5" /> Save Article
               </button>

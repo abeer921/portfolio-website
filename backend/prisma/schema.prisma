@@ -88,7 +88,9 @@ model Skill {
   name      String
   category  String   // e.g. Frontend, Backend, UI UX, Tools, Soft Skills, Languages
   level     Int      // 0 to 100
+  position  Int      @default(0)
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Certificate {
@@ -109,17 +111,24 @@ model Testimonial {
   company     String?
   review      String
   rating      Int      @default(5)
+  position    Int      @default(0)
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 }
 
 model Service {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  icon        String?
-  price       String?
-  faqs        Json     @default("[]") // FAQs represented as a JSON array of { question, answer }
-  createdAt   DateTime @default(now())
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  icon         String?
+  price        String?
+  num          String?
+  previewImage String?
+  items        String[] @default([])
+  faqs         Json     @default("[]")
+  position     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 }
 
 model Message {
@@ -134,8 +143,14 @@ model Message {
 
 model Settings {
   id              String   @id @default("global")
-  heroTitle       String   @default("Crafting Digital Experiences That Matter")
-  heroSubtitle    String   @default("UI/UX Designer & Frontend Architect specializing in premium, high-interaction digital products.")
+  brandName       String   @default("Abeer Nisar")
+  tagline         String   @default("UI/UX designer crafting meaningful digital experiences.")
+  heroEyebrow     String   @default("UI/UX DESIGNER • PRODUCT DESIGNER")
+  heroTitle       String   @default("Turning Ideas Into Beautiful &\nFunctional Products.")
+  heroSubtitle    String   @default("I'm Abeer Nisar, a UI/UX Designer passionate about creating intuitive interfaces\nwhile exploring AI-powered products that combine creativity, technology, and\nmeaningful user experiences.")
+  heroCtaLabel    String   @default("View My Work")
+  heroCtaHref      String   @default("/projects")
+  heroSecondaryCtaLabel String @default("Download Resume")
   resumeUrl       String?
   contactEmail    String   @default("abeernisar11@gmail.com")
   contactPhone    String   @default("+92 302 4115583")
@@ -145,8 +160,40 @@ model Settings {
   metaDescription String   @default("Creative UI/UX Designer and Frontend Engineer portfolio.")
   metaKeywords    String[]
   ogImage         String?
-  primaryColor    String   @default("#d4af37") // Gold
-  secondaryColor  String   @default("#121212") // Dark charcoal
+  primaryColor    String   @default("#d4af37")
+  secondaryColor  String   @default("#121212")
   themeMode       String   @default("dark")
+  socialLinks     Json     @default("[]")
+  navItems        Json     @default("[]")
+  footerLinks     Json     @default("[]")
+  footerGreeting  String   @default("Hi")
+  copyrightText   String?
   updatedAt       DateTime @updatedAt
+}
+
+model SiteContent {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  content   Json
+  updatedAt DateTime @updatedAt
+}
+
+model Education {
+  id        String   @id @default(uuid())
+  degree    String
+  school    String
+  duration  String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model MediaAsset {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  alt       String?
+  createdAt DateTime @default(now())
 }

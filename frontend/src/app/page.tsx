@@ -1,329 +1,289 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { ArrowRight, Download, Eye, Award, Briefcase, Users, Star } from 'lucide-react';
-import { apiService, fallbackData } from '@/services/apiService';
-import MagneticButton from '@/components/ui/MagneticButton';
-import Marquee from '@/components/ui/Marquee';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowUpRight, Plus, Minus } from 'lucide-react';
+import { fallbackData } from '@/services/apiService';
+import FadeIn from '@/components/ui/FadeIn';
+import HeroSection from '@/components/shared/HeroSection';
+import HomeGradient from '@/components/shared/HomeGradient';
+import ServicesAccordion from '@/components/shared/ServicesAccordion';
+import FeaturedProjectsStack from '@/components/shared/FeaturedProjectsStack';
+import { useCms } from '@/context/CmsContext';
+import { cmsDefaults } from '@/lib/cmsDefaults';
+
+const ease = [0.16, 1, 0.3, 1] as const;
+
+const DEFAULT_FAQS = [
+  { question: 'What services do you offer?', answer: 'I offer UI/UX design, web and mobile interface design, prototyping in Figma, design systems, and branding support for digital products.' },
+  { question: 'How does the design process work?', answer: 'We start with discovery and research, move into wireframes and user flows, then create high-fidelity prototypes with revisions before developer handoff.' },
+  { question: 'How long does a project usually take?', answer: 'A landing page takes 1–2 weeks. A full application design with research and prototypes typically takes 4–6 weeks depending on scope.' },
+  { question: 'What do I need to provide before starting?', answer: 'Share your goals, target audience, brand assets if available, and any reference sites or competitors you admire.' },
+  { question: 'Do you offer revisions?', answer: 'Yes. Each project includes structured revision rounds at wireframe and high-fidelity stages to ensure alignment before final delivery.' },
+  { question: 'How do I get started?', answer: 'Send a message through the contact form with your project details, timeline, and budget range. I will respond within 24–48 hours.' },
+];
+
+const SOCIAL_ICONS: Record<string, React.ReactNode> = {
+  x: (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.527-8.603L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+    </svg>
+  ),
+  instagram: (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  behance: (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+      <path d="M6.5 10.5c1.4 0 2.3-.7 2.3-1.8 0-1.1-.8-1.7-2.1-1.7H3.8v3.5H6.5zm-2.7 5.3h2.9c1.5 0 2.5-.7 2.5-2s-1-2-2.5-2H3.8v4zm10.4-2.1c.1 1.2.8 1.8 1.9 1.8.9 0 1.5-.4 1.7-1.1h2c-.3 1.9-1.9 3.1-3.8 3.1-2.5 0-4.2-1.8-4.2-4.3s1.7-4.3 4.1-4.3c2.4 0 3.9 1.8 3.9 4.4v.4h-5.6zm2.4-5.2h4.1V7.1H13.8v1.4zm-2.2 3.4h3.3c-.1-1-.8-1.6-1.7-1.6-.9 0-1.5.6-1.6 1.6zM8.5 15.3H6.5v.1h2z" />
+    </svg>
+  ),
+  dribbble: (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm6.61 5.67a8 8 0 0 1 1.28 4.48c-.45-.1-5-.95-7.56-.41-.08-.18-.16-.37-.24-.56a22 22 0 0 0-.54-1.1c2.74-1.12 5.04-2.86 7.06-2.41zM12 3.9c1.83 0 3.5.66 4.8 1.75-1.76.55-3.75 2.1-6.22 3.17A36 36 0 0 0 7.4 4.78 8.05 8.05 0 0 1 12 3.9zM5.6 6.1c.84.98 2.65 3.17 4.2 6.07-3.15.92-8.45 1.05-8.54 1.05A8.07 8.07 0 0 1 5.6 6.1zM3.92 14.6s4.97-.1 8.03-1.2c.22.58.44 1.17.63 1.76-.03 0-6.25 2.12-8.66 5.51A8.06 8.06 0 0 1 3.92 14.6zm5.18 6.36c1.6-2.77 3.66-4.55 4.6-5.2a27 27 0 0 1 2.88 7.14 8 8 0 0 1-7.48-1.94zm8.86-.1a26 26 0 0 0-2.62-6.73c1.86-.3 4.65.16 5.93.64a8.08 8.08 0 0 1-3.31 6.09z" />
+    </svg>
+  ),
+};
 
 export default function Home() {
-  const [settings, setSettings] = useState(fallbackData.settings);
-  const [projects, setProjects] = useState<any[]>([]);
-  const [skills, setSkills] = useState<any[]>([]);
-  const [testimonials, setTestimonials] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { cms, loading, getContent } = useCms();
+  const settings = cms.settings as Record<string, string>;
+  const about = getContent<typeof cmsDefaults.content['home.about']>('home.about');
+  const featured = getContent<typeof cmsDefaults.content['home.featuredProjects']>('home.featuredProjects');
+  const testimonialsSection = getContent<typeof cmsDefaults.content['home.testimonials']>('home.testimonials');
+  const faqSection = getContent<{ heading?: string; intro?: string; items?: { question: string; answer: string }[] }>('home.faq');
+  const contactCta = getContent<typeof cmsDefaults.content['home.contactCta']>('home.contactCta');
 
-  useEffect(() => {
-    const loadHomeData = async () => {
-      try {
-        const [settData, projData, skillData, testData] = await Promise.all([
-          apiService.getSettings(),
-          apiService.getProjects({ featured: true }),
-          apiService.getSkills(),
-          apiService.getTestimonials(),
-        ]);
-        setSettings(settData);
-        setProjects(projData.slice(0, 3));
-        setSkills(skillData.filter((s) => s.category === 'UI UX').slice(0, 5));
-        setTestimonials(testData.slice(0, 2));
-      } catch (error) {
-        console.error('Error loading home data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadHomeData();
-  }, []);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const stats = [
-    { number: '6+', label: 'Months Experience', icon: Briefcase },
-    { number: '15+', label: 'Successful Projects', icon: Award },
-    { number: '10+', label: 'Happy Clients', icon: Users },
+  const featuredProjects = (cms.projects as typeof fallbackData.projects).filter((p) => p.featured).slice(0, 4);
+  const displayProjects = loading ? fallbackData.projects.filter((p) => p.featured).slice(0, 4) : featuredProjects.length ? featuredProjects : fallbackData.projects.filter((p) => p.featured).slice(0, 4);
+
+  const displayTestimonials = loading
+    ? fallbackData.testimonials
+    : (cms.testimonials as typeof fallbackData.testimonials).length
+      ? (cms.testimonials as typeof fallbackData.testimonials)
+      : fallbackData.testimonials;
+
+  const faqs = faqSection.items?.length ? faqSection.items : DEFAULT_FAQS;
+  const socialLinks = (Array.isArray(cms.settings.socialLinks) ? cms.settings.socialLinks : cmsDefaults.settings.socialLinks) as { platform: string; url: string }[];
+  const stats = about.stats?.length ? about.stats : [
+    { value: '2+', label: 'Years of Experience' },
+    { value: String(displayProjects.length || 4), label: 'Completed Projects' },
+    { value: `${Math.max(displayTestimonials.length, 5)}+`, label: 'Clients Worldwide' },
   ];
 
   return (
-    <div className="relative pt-32 pb-16 overflow-hidden">
-      {/* Decorative Radial Ambient Glows */}
-      <div className="glow-spot top-[10%] left-[10%] opacity-40 animate-pulse" />
-      <div className="glow-spot bottom-[30%] right-[5%] opacity-30" />
+    <div className="landing-page theme-transition">
+      <HomeGradient />
+      <HeroSection
+        eyebrow={settings.heroEyebrow || 'UI/UX DESIGNER • PRODUCT DESIGNER'}
+        title={settings.heroTitle || 'Turning Ideas Into Beautiful &\nFunctional Products.'}
+        subtitle={settings.heroSubtitle || "I'm Abeer Nisar, a UI/UX Designer passionate about creating intuitive interfaces\nwhile exploring AI-powered products that combine creativity, technology, and\nmeaningful user experiences."}
+        ctaLabel={settings.heroCtaLabel || 'View My Work'}
+        ctaHref={settings.heroCtaHref || '/projects'}
+        secondaryCtaLabel={(settings as Record<string, string>).heroSecondaryCtaLabel || 'Download Resume'}
+        secondaryCtaHref={settings.resumeUrl || '/uploads/Abeer%20nisar%20resume.pdf'}
+      />
 
-      {/* Grid Dot Background */}
-      <div className="absolute inset-0 dot-bg opacity-40 z-0 pointer-events-none" />
+      <ServicesAccordion />
 
-      <div className="mx-auto max-w-7xl px-6 md:px-12 relative z-10">
-        
-        {/* ==========================================
-            HERO SECTION
-            ========================================== */}
-        <section className="min-h-[70vh] flex flex-col justify-center items-start mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-950 border border-zinc-900 text-xs text-[#d4af37] font-semibold mb-8"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#d4af37] animate-ping" />
-            UI/UX DESIGNER & DEVELOPER
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-black text-4xl sm:text-6xl md:text-8xl tracking-tight leading-[1.05] text-white max-w-5xl mb-8"
-          >
-            {settings.heroTitle.split(' ').map((word, i) => {
-              const isGold = word.toLowerCase().includes('experiences') || word.toLowerCase().includes('interfaces') || word.toLowerCase().includes('matter.');
-              return (
-                <span key={i} className={isGold ? 'text-[#d4af37]' : 'text-white'}>
-                  {word}{' '}
-                </span>
-              );
-            })}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-zinc-400 text-base md:text-xl max-w-2xl leading-relaxed mb-12"
-          >
-            {settings.heroSubtitle}
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col sm:flex-row gap-4"
-          >
-            <Link href="/projects">
-              <MagneticButton className="px-8 py-4 bg-[#d4af37] hover:bg-[#bda02b] text-black font-semibold rounded-full flex items-center gap-3 transition-colors duration-300 shadow-lg shadow-[#d4af37]/10">
-                View My Work
-                <ArrowRight className="w-4 h-4" />
-              </MagneticButton>
-            </Link>
-
-            <a href={settings.resumeUrl || '#'} target="_blank" rel="noopener noreferrer">
-              <MagneticButton className="px-8 py-4 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-white font-medium rounded-full flex items-center gap-3 transition-colors duration-300">
-                Download CV
-                <Download className="w-4 h-4 text-zinc-400" />
-              </MagneticButton>
-            </a>
-          </motion.div>
-        </section>
-
-        {/* ==========================================
-            STATS SECTION
-            ========================================== */}
-        <section className="py-12 border-y border-zinc-900 mb-32 bg-black/20 rounded-2xl backdrop-blur-sm">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 25 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.6 }}
-                  className="flex flex-col items-center p-4 group"
-                >
-                  <div className="w-12 h-12 rounded-full bg-zinc-950 border border-zinc-900 flex items-center justify-center mb-4 text-[#d4af37] group-hover:border-[#d4af37] transition-colors duration-300">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <span className="font-display font-black text-5xl text-white mb-2">{stat.number}</span>
-                  <span className="text-zinc-500 text-xs tracking-wider uppercase font-medium">{stat.label}</span>
-                </motion.div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* ==========================================
-            FEATURED PROJECTS PREVIEW
-            ========================================== */}
-        <section className="mb-32">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16">
-            <div>
-              <span className="text-[#d4af37] text-xs font-semibold tracking-wider uppercase mb-2 block">SELECTED CREATIVES</span>
-              <h2 className="font-display font-bold text-3xl md:text-5xl text-white tracking-tight">Latest Work</h2>
-            </div>
-            <Link href="/projects" className="text-zinc-400 hover:text-white flex items-center gap-2 text-sm font-medium transition-colors duration-200 mt-4 md:mt-0 group">
-              Explore All Projects
-              <ArrowRight className="w-4 h-4 text-[#d4af37] group-hover:translate-x-1 transition-transform duration-200" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {projects.length > 0 ? (
-              projects.map((project, idx) => (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1, duration: 0.8 }}
-                  className="group relative rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-900 shadow-xl"
-                >
-                  {/* Aspect-ratio helper for Image */}
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-900">
-                    <Image
-                      src={project.images[0] || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80'}
-                      alt={project.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-90 group-hover:brightness-100"
-                      sizes="(max-w-720px) 100vw, 33vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <Link href={`/projects/${project.id}`}>
-                        <MagneticButton className="w-12 h-12 rounded-full bg-[#d4af37] text-black flex items-center justify-center">
-                          <Eye className="w-5 h-5" />
-                        </MagneticButton>
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="p-6">
-                    <span className="text-zinc-500 text-xs tracking-wider uppercase font-semibold block mb-2">{project.category}</span>
-                    <h3 className="font-display font-bold text-lg text-white mb-3 group-hover:text-[#d4af37] transition-colors duration-300">
-                      {project.title}
-                    </h3>
-                    <p className="text-zinc-400 text-sm leading-relaxed line-clamp-2 mb-6">
-                      {project.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.techStack.slice(0, 3).map((tech: string, i: number) => (
-                        <span key={i} className="text-[10px] tracking-wider uppercase bg-zinc-900 border border-zinc-800 text-zinc-400 px-2.5 py-1 rounded-full">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              // Loading fallback skeleton
-              Array(3).fill(0).map((_, i) => (
-                <div key={i} className="rounded-2xl border border-zinc-900 bg-zinc-950/40 h-96 animate-pulse" />
-              ))
-            )}
-          </div>
-        </section>
-
-        {/* ==========================================
-            SKILLS & EXPERIENCE PREVIEW
-            ========================================== */}
-        <section className="mb-32 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      {/* About */}
+      <section className="border-t border-[var(--border)] px-6 py-20 theme-transition sm:px-8 lg:px-12 lg:py-28">
+        <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">
           <div>
-            <span className="text-[#d4af37] text-xs font-semibold tracking-wider uppercase mb-2 block">TECHNICAL ARSENAL</span>
-            <h2 className="font-display font-bold text-3xl md:text-5xl text-white tracking-tight mb-8">Expertise Highlights</h2>
-            <p className="text-zinc-400 leading-relaxed mb-10">
-              Proficient in wireframing, creating high-fidelity prototypes, and constructing modern, scalable design systems. I combine aesthetic elegance with engineering discipline to construct pixel-perfect experiences.
-            </p>
+            <FadeIn>
+              <h2 className="about-home-heading">{about.heading || 'About me'}</h2>
+              <p className="about-home-bio">{about.bio}</p>
+            </FadeIn>
 
-            <div className="space-y-6">
-              {(skills.length > 0 ? skills : fallbackData.skills.filter(s => s.category === 'UI UX').slice(0, 4)).map((skill, idx) => (
-                <div key={skill.id || idx}>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium text-white">{skill.name}</span>
-                    <span className="text-zinc-500">{skill.level}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-zinc-950 border border-zinc-900 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${skill.level}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1, delay: idx * 0.1, ease: 'easeOut' }}
-                      className="h-full bg-gradient-to-r from-[#d4af37] to-white rounded-full"
-                    />
-                  </div>
+            <FadeIn delay={0.08}>
+              <div className="about-home-stats">
+                {stats.map((stat) => (
+                  <motion.div key={stat.label} whileHover={{ y: -3 }} transition={{ duration: 0.3 }} className="about-home-stat">
+                    <p className="about-home-stat-value">{stat.value}</p>
+                    <p className="about-home-stat-label">{stat.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.12}>
+              <div className="about-home-contact">
+                <div>
+                  <p className="about-home-contact-label">Call Today :</p>
+                  <a href={`tel:${settings.contactPhone?.replace(/\s/g, '')}`} className="about-home-contact-value interactive-cursor">
+                    {settings.contactPhone}
+                  </a>
                 </div>
-              ))}
-            </div>
-            
-            <Link href="/about">
-              <MagneticButton className="mt-12 px-6 py-3 border border-zinc-800 hover:border-white text-white rounded-full flex items-center gap-2 text-sm font-medium transition-colors duration-300">
-                View All Skills
-                <ArrowRight className="w-4 h-4" />
-              </MagneticButton>
-            </Link>
+                <div>
+                  <p className="about-home-contact-label">Email :</p>
+                  <a href={`mailto:${settings.contactEmail}`} className="about-home-contact-value interactive-cursor">
+                    {settings.contactEmail}
+                  </a>
+                </div>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.16}>
+              <div className="about-home-socials">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.platform}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="about-home-social interactive-cursor"
+                    aria-label={social.platform}
+                  >
+                    {SOCIAL_ICONS[social.platform] || SOCIAL_ICONS.x}
+                  </a>
+                ))}
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.2}>
+              <Link href={about.ctaHref || '/about'} className="about-home-cta interactive-cursor">
+                {about.ctaLabel || 'My Story'}
+              </Link>
+            </FadeIn>
           </div>
 
-          <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-zinc-950 border border-zinc-900 p-2">
-            <Image
-              src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80"
-              alt="Creative Space"
-              fill
-              className="object-cover rounded-xl opacity-70 filter saturate-[0.1]"
-              sizes="(max-w-1024px) 100vw, 50vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-8">
-              <span className="text-[#d4af37] text-2xl font-display font-black tracking-tight mb-2">Abeer Nisar</span>
-              <p className="text-zinc-400 text-sm leading-relaxed max-w-md">
-                "Design is not just what it looks like and feels like. Design is how it works."
-              </p>
+          <FadeIn delay={0.15} className="flex justify-center lg:justify-end">
+            <div className="about-home-image-wrap">
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.9, ease }}
+                className="about-home-image-frame"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={about.portraitImage || '/images/about/portrait.jpg'}
+                  alt={settings.brandName || 'Portrait'}
+                  width={640}
+                  height={800}
+                  className="about-home-image"
+                  loading="eager"
+                  decoding="async"
+                />
+                <span className="about-home-image-dot" aria-hidden />
+              </motion.div>
             </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ==========================================
-          SCROLLING MARQUEE
-          ========================================== */}
-      <section className="mb-32 w-full">
-        <Marquee items={['Figma', 'Wireframing', 'Prototyping', 'User Research', 'Design Systems', 'Web Layouts', 'Visual Hierarchy']} speed="medium" />
+          </FadeIn>
+        </div>
       </section>
 
-      {/* ==========================================
-          TESTIMONIALS PREVIEW
-          ========================================== */}
-      <div className="mx-auto max-w-7xl px-6 md:px-12 relative z-10">
-        <section className="mb-32">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-[#d4af37] text-xs font-semibold tracking-wider uppercase mb-2 block">CLIENT FEEDBACK</span>
-            <h2 className="font-display font-bold text-3xl md:text-5xl text-white tracking-tight">Kind Words</h2>
-          </div>
+      <FeaturedProjectsStack
+        projects={displayProjects}
+        title={featured.title}
+        intro={featured.intro}
+        browseAllLabel={featured.browseAllLabel}
+      />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {(testimonials.length > 0 ? testimonials : fallbackData.testimonials).map((t, idx) => (
-              <motion.div
-                key={t.id || idx}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="p-8 rounded-2xl bg-zinc-950 border border-zinc-900 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex gap-1 mb-6 text-[#d4af37]">
-                    {Array(t.rating || 5).fill(0).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
+      {displayTestimonials.length > 0 && (
+        <section className="border-t border-[var(--border)] px-6 py-20 theme-transition sm:px-8 lg:px-12 lg:py-28">
+          <div className="mx-auto max-w-7xl">
+            <FadeIn>
+              <h2 className="brand-heading mb-4">{testimonialsSection.heading}</h2>
+              <p className="mb-16 max-w-2xl text-[var(--muted-foreground)]">{testimonialsSection.intro}</p>
+            </FadeIn>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {displayTestimonials.map((t, idx) => (
+                <FadeIn key={t.id} delay={idx * 0.1}>
+                  <motion.blockquote whileHover={{ y: -4 }} transition={{ duration: 0.35 }} className="glass-surface rounded-2xl border border-[var(--border)] p-8 theme-transition">
+                    <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">&ldquo;{t.review}&rdquo;</p>
+                    <footer className="mt-6 flex items-center gap-3">
+                      <div className="relative h-10 w-10 overflow-hidden rounded-full bg-[var(--surface-muted)]">
+                        <Image src={t.clientPhoto || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80'} alt={t.clientName} fill className="object-cover" sizes="40px" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">{t.clientName}</p>
+                        <p className="text-xs text-[var(--muted)]">{t.clientRole}{t.company ? `, ${t.company}` : ''}</p>
+                      </div>
+                    </footer>
+                  </motion.blockquote>
+                </FadeIn>
+              ))}
+              <FadeIn delay={0.2}>
+                <div className="stat-card flex flex-col items-center justify-center rounded-2xl p-8 text-center md:col-span-2 lg:col-span-1 theme-transition">
+                  <p className="text-sm opacity-60">{testimonialsSection.statCard?.prefix || "I've worked with"}</p>
+                  <p className="portavia-stat mt-2">{displayTestimonials.length}+</p>
+                  <p className="text-sm opacity-60">{testimonialsSection.statCard?.suffix || 'happy clients'}</p>
+                  <div className="mt-8 grid w-full grid-cols-2 gap-6 border-t border-current/10 pt-8">
+                    {(testimonialsSection.statCard?.metrics || [
+                      { value: '100%', label: 'Satisfaction Rate' },
+                      { value: '2x', label: 'Faster Delivery' },
+                    ]).map((m) => (
+                      <div key={m.label}>
+                        <p className="text-3xl font-semibold">{m.value}</p>
+                        <p className="mt-1 text-xs opacity-50">{m.label}</p>
+                      </div>
                     ))}
                   </div>
-                  <p className="text-zinc-300 text-base leading-relaxed mb-8 italic">
-                    "{t.review}"
-                  </p>
                 </div>
-                <div className="flex items-center gap-4 border-t border-zinc-900/50 pt-6">
-                  {t.clientPhoto && (
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden bg-zinc-800">
-                      <Image src={t.clientPhoto} alt={t.clientName} fill className="object-cover" />
-                    </div>
-                  )}
-                  <div>
-                    <span className="font-semibold text-white block text-sm">{t.clientName}</span>
-                    <span className="text-zinc-500 text-xs">{t.clientRole}, {t.company}</span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+              </FadeIn>
+            </div>
           </div>
         </section>
-      </div>
+      )}
+
+      <section className="border-t border-[var(--border)] px-6 py-20 theme-transition sm:px-8 lg:px-12 lg:py-28">
+        <div className="mx-auto max-w-3xl">
+          <FadeIn className="text-center">
+            <h2 className="brand-heading mb-4">{faqSection.heading || 'Frequently Asked Questions'}</h2>
+            <p className="mb-12 text-[var(--muted-foreground)]">{faqSection.intro}</p>
+          </FadeIn>
+          <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+            {faqs.map((faq, idx) => (
+              <div key={idx}>
+                <button onClick={() => setOpenFaq(openFaq === idx ? null : idx)} className="interactive-cursor flex w-full items-center justify-between gap-4 py-6 text-left transition-colors hover:opacity-80">
+                  <span className="font-medium">{idx + 1}. {faq.question}</span>
+                  <motion.span animate={{ rotate: openFaq === idx ? 180 : 0 }} transition={{ duration: 0.3 }}>
+                    {openFaq === idx ? <Minus className="h-4 w-4 shrink-0" /> : <Plus className="h-4 w-4 shrink-0" />}
+                  </motion.span>
+                </button>
+                <AnimatePresence>
+                  {openFaq === idx && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease }} className="overflow-hidden">
+                      <p className="pb-6 text-sm leading-relaxed text-[var(--muted-foreground)]">{faq.answer}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden border-t border-[var(--border)]">
+        <div className="absolute inset-0">
+          <Image
+            src={contactCta.backgroundImage || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80'}
+            alt=""
+            fill
+            className="object-cover opacity-30"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0612]/90 via-[#1E1228]/60 to-transparent" />
+        </div>
+        <div className="relative px-6 py-24 sm:px-8 lg:px-12 lg:py-32">
+          <FadeIn className="mx-auto max-w-3xl text-center">
+            <p className="mb-4 text-sm text-[var(--muted-foreground)]">{contactCta.greeting}</p>
+            <h2 className="portavia-hero-word mb-8 !text-[clamp(2.5rem,8vw,5rem)]">{contactCta.heading}</h2>
+            <p className="mx-auto mb-10 max-w-lg text-[var(--muted-foreground)]">{contactCta.body}</p>
+            <Link href={contactCta.ctaHref || '/contact'} className="btn-primary interactive-cursor px-10 py-4 text-sm">
+              {contactCta.ctaLabel} <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </FadeIn>
+        </div>
+      </section>
     </div>
   );
 }

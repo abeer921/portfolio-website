@@ -60,16 +60,18 @@ export default function CustomCursor() {
       {/* Center dot */}
       <div
         ref={cursorRef}
-        className={`fixed top-0 left-0 w-1.5 h-1.5 bg-[#d4af37] rounded-full pointer-events-none z-[99999] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 hidden md:block ${
+        className={`fixed top-0 left-0 w-1.5 h-1.5 rounded-full pointer-events-none z-[99999] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 hidden md:block ${
           isHidden ? 'opacity-0' : 'opacity-100'
         }`}
+        style={{ background: 'var(--cursor-dot)' }}
       />
       {/* Outer ring */}
       <div
         ref={followerRef}
-        className={`fixed top-0 left-0 w-8 h-8 border border-[#d4af37] rounded-full pointer-events-none z-[99998] -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out hidden md:block ${
+        className={`fixed top-0 left-0 w-8 h-8 rounded-full pointer-events-none z-[99998] -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out hidden md:block border ${
           isHidden ? 'opacity-0 scale-50' : 'opacity-100'
-        } ${isHovered ? 'scale-150 bg-[rgba(212,175,55,0.08)] border-solid border-[#d4af37]' : ''}`}
+        } ${isHovered ? 'scale-150' : ''}`}
+        style={{ borderColor: 'var(--cursor-ring)', background: isHovered ? 'color-mix(in srgb, var(--cursor-ring) 8%, transparent)' : 'transparent' }}
       />
     </>
   );

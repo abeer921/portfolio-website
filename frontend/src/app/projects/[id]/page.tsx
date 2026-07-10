@@ -72,7 +72,7 @@ export default function ProjectDetail() {
   }
 
   return (
-    <div className="relative pt-32 pb-24 overflow-hidden">
+    <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, ease: 'easeOut' }} className="relative pt-32 pb-24 overflow-hidden">
       {/* Glow Highlight */}
       <div className="glow-spot top-[15%] left-[20%] opacity-20" />
       <div className="glow-spot bottom-[15%] right-[10%] opacity-20" />
@@ -94,7 +94,7 @@ export default function ProjectDetail() {
         <section className="mb-16">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
-              <span className="text-[#d4af37] text-xs font-semibold tracking-wider uppercase mb-2 block">{project.category}</span>
+              <span className="text-[#8B5CF6] text-xs font-semibold tracking-wider uppercase mb-2 block">{project.category}</span>
               <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl text-white tracking-tight leading-none">
                 {project.title}
               </h1>
@@ -103,7 +103,7 @@ export default function ProjectDetail() {
             <div className="flex flex-wrap items-center gap-3">
               {project.liveDemo && project.liveDemo !== '#' && (
                 <a href={project.liveDemo} target="_blank" rel="noopener noreferrer">
-                  <MagneticButton className="px-4 py-2 bg-[#d4af37] hover:bg-[#bda02b] text-black text-xs font-semibold rounded-full flex items-center gap-1.5 shadow-md">
+                  <MagneticButton className="px-4 py-2 bg-[#8B5CF6] hover:bg-[#C084FC] text-black text-xs font-semibold rounded-full flex items-center gap-1.5 shadow-md">
                     Live Demo
                     <Globe className="w-3.5 h-3.5" />
                   </MagneticButton>
@@ -193,14 +193,14 @@ export default function ProjectDetail() {
           <section className="mb-24">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
               <div className="lg:col-span-4">
-                <span className="text-[#d4af37] text-xs font-semibold tracking-wider uppercase mb-2 block">METHODOLOGY</span>
+                <span className="text-[#8B5CF6] text-xs font-semibold tracking-wider uppercase mb-2 block">METHODOLOGY</span>
                 <h2 className="font-display font-bold text-2xl md:text-3xl text-white mb-6">Design & Code Process</h2>
                 <p className="text-zinc-500 text-sm leading-relaxed mb-6">
                   Breaking down the visual and structural roadmap implemented, from competitive analysis to the final screens.
                 </p>
                 {project.techStack.map((tech: string, i: number) => (
                   <div key={i} className="flex items-center gap-2.5 text-zinc-400 text-xs py-2 border-b border-zinc-900">
-                    <CheckCircle className="w-3.5 h-3.5 text-[#d4af37]" />
+                    <CheckCircle className="w-3.5 h-3.5 text-[#8B5CF6]" />
                     {tech}
                   </div>
                 ))}
@@ -252,7 +252,7 @@ export default function ProjectDetail() {
                 <span className="text-zinc-600 text-[10px] tracking-wider uppercase font-semibold flex items-center gap-1">
                   <ChevronLeft className="w-3.5 h-3.5" /> PREVIOUS PROJECT
                 </span>
-                <span className="text-white text-sm md:text-base font-bold group-hover:text-[#d4af37] transition-colors duration-200">
+                <span className="text-white text-sm md:text-base font-bold group-hover:text-[#8B5CF6] transition-colors duration-200">
                   {project.navigation.prev.title}
                 </span>
               </button>
@@ -268,7 +268,7 @@ export default function ProjectDetail() {
                 <span className="text-zinc-600 text-[10px] tracking-wider uppercase font-semibold flex items-center gap-1">
                   NEXT PROJECT <ChevronRight className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-white text-sm md:text-base font-bold group-hover:text-[#d4af37] transition-colors duration-200">
+                <span className="text-white text-sm md:text-base font-bold group-hover:text-[#8B5CF6] transition-colors duration-200">
                   {project.navigation.next.title}
                 </span>
               </button>
@@ -279,6 +279,6 @@ export default function ProjectDetail() {
         )}
 
       </div>
-    </div>
+    </motion.div>
   );
 }

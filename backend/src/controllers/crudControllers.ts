@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../config/db';
+import { sendContactMessageNotification } from '../config/email';
 
 // ==========================================
 // SKILLS
@@ -187,10 +188,10 @@ export const deleteCertificate = async (req: Request, res: Response) => {
 // ==========================================
 // TESTIMONIALS
 // ==========================================
-export const getAllTestimonials = async (req: Request, res: Response) => {
+export const getAllTestimonials = async (_req: Request, res: Response) => {
   try {
     const testimonials = await prisma.testimonial.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { position: 'asc' },
     });
     return res.json(testimonials);
   } catch (error: any) {
@@ -199,7 +200,7 @@ export const getAllTestimonials = async (req: Request, res: Response) => {
 };
 
 export const createTestimonial = async (req: Request, res: Response) => {
-  const { clientName, clientPhoto, clientRole, company, review, rating } = req.body;
+  const { clientName, clientPhoto, clientRole, company, review, rating, position } = req.body;
   if (!clientName || !review) {
     return res.status(400).json({ message: 'Client name and review are required' });
   }
@@ -212,6 +213,7 @@ export const createTestimonial = async (req: Request, res: Response) => {
         company,
         review,
         rating: rating !== undefined ? Number(rating) : 5,
+        position: position !== undefined ? Number(position) : 0,
       },
     });
     return res.status(201).json(testimonial);
@@ -248,10 +250,10 @@ export const deleteTestimonial = async (req: Request, res: Response) => {
 // ==========================================
 // SERVICES
 // ==========================================
-export const getAllServices = async (req: Request, res: Response) => {
+export const getAllServices = async (_req: Request, res: Response) => {
   try {
     const services = await prisma.service.findMany({
-      orderBy: { createdAt: 'asc' },
+      orderBy: { position: 'asc' },
     });
     return res.json(services);
   } catch (error: any) {
@@ -260,7 +262,7 @@ export const getAllServices = async (req: Request, res: Response) => {
 };
 
 export const createService = async (req: Request, res: Response) => {
-  const { title, description, icon, price, faqs } = req.body;
+  const { title, description, icon, price, faqs, num, previewImage, items, position } = req.body;
   if (!title || !description) {
     return res.status(400).json({ message: 'Title and description are required' });
   }
@@ -271,6 +273,10 @@ export const createService = async (req: Request, res: Response) => {
         description,
         icon,
         price,
+        num,
+        previewImage,
+        items: Array.isArray(items) ? items : [],
+        position: position !== undefined ? Number(position) : 0,
         faqs: faqs ? (typeof faqs === 'string' ? JSON.parse(faqs) : faqs) : [],
       },
     });
@@ -323,14 +329,46 @@ export const getAllMessages = async (req: Request, res: Response) => {
 
 export const createMessage = async (req: Request, res: Response) => {
   const { name, email, subject, message } = req.body;
-  if (!name || !email || !message) {
+  const cleanName = typeof name === 'string' ? name.trim() : '';
+  const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const cleanSubject = typeof subject === 'string' ? subject.trim() : '';
+  const cleanMessage = typeof message === 'string' ? message.trim() : '';
+
+  if (!cleanName || !cleanEmail || !cleanMessage) {
     return res.status(400).json({ message: 'Name, email, and message are required' });
   }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    return res.status(400).json({ message: 'Please enter a valid email address' });
+  }
+
   try {
     const msg = await prisma.message.create({
-      data: { name, email, subject, message },
+      data: {
+        name: cleanName,
+        email: cleanEmail,
+        subject: cleanSubject || null,
+        message: cleanMessage,
+      },
     });
-    return res.status(201).json({ message: 'Message sent successfully', data: msg });
+
+    const settings = await prisma.settings.findUnique({
+      where: { id: 'global' },
+      select: { contactEmail: true },
+    });
+
+    let emailNotificationSent = false;
+    try {
+      emailNotificationSent = await sendContactMessageNotification(msg, settings?.contactEmail);
+    } catch (emailError) {
+      console.error('Contact email notification failed:', emailError);
+    }
+
+    return res.status(201).json({
+      message: 'Message sent successfully',
+      emailNotificationSent,
+      data: msg,
+    });
   } catch (error: any) {
     return res.status(500).json({ message: 'Error submitting message', error: error.message });
   }
@@ -386,6 +424,15 @@ export const updateSettings = async (req: Request, res: Response) => {
   try {
     if (data.metaKeywords && typeof data.metaKeywords === 'string') {
       data.metaKeywords = JSON.parse(data.metaKeywords);
+    }
+    if (data.socialLinks && typeof data.socialLinks === 'string') {
+      data.socialLinks = JSON.parse(data.socialLinks);
+    }
+    if (data.navItems && typeof data.navItems === 'string') {
+      data.navItems = JSON.parse(data.navItems);
+    }
+    if (data.footerLinks && typeof data.footerLinks === 'string') {
+      data.footerLinks = JSON.parse(data.footerLinks);
     }
     const updated = await prisma.settings.update({
       where: { id: 'global' },

@@ -50,6 +50,21 @@ import {
   getSettings,
   updateSettings,
 } from '../controllers/crudControllers';
+import {
+  getCmsBundle,
+  getAllSiteContent,
+  upsertSiteContent,
+  deleteSiteContent,
+  reorderItems,
+  getAllEducation,
+  createEducation,
+  updateEducation,
+  deleteEducation,
+  getAllMedia,
+  createMedia,
+  deleteMedia,
+} from '../controllers/cmsController';
+import { prisma } from '../config/db';
 
 const router = Router();
 
@@ -73,6 +88,10 @@ router.delete('/projects/:id', authenticateAdmin, deleteProject);
 // BLOGS & COMMENTS
 // ==========================================
 router.get('/blogs', getAllBlogs);
+router.get('/blogs/admin/all', authenticateAdmin, (req, res, next) => {
+  req.query.all = 'true';
+  return getAllBlogs(req, res).catch(next);
+});
 router.get('/blogs/:id', getBlogById);
 router.post('/blogs', authenticateAdmin, createBlog);
 router.put('/blogs/:id', authenticateAdmin, updateBlog);
@@ -135,19 +154,60 @@ router.get('/settings', getSettings);
 router.put('/settings', authenticateAdmin, updateSettings);
 
 // ==========================================
+// CMS BUNDLE & SITE CONTENT
+// ==========================================
+router.get('/cms', getCmsBundle);
+router.get('/site-content', authenticateAdmin, getAllSiteContent);
+router.put('/site-content', authenticateAdmin, upsertSiteContent);
+router.delete('/site-content/:key', authenticateAdmin, deleteSiteContent);
+router.put('/reorder', authenticateAdmin, reorderItems);
+
+// ==========================================
+// EDUCATION
+// ==========================================
+router.get('/education', getAllEducation);
+router.post('/education', authenticateAdmin, createEducation);
+router.put('/education/:id', authenticateAdmin, updateEducation);
+router.delete('/education/:id', authenticateAdmin, deleteEducation);
+
+// ==========================================
+// MEDIA LIBRARY
+// ==========================================
+router.get('/media', authenticateAdmin, getAllMedia);
+router.delete('/media/:id', authenticateAdmin, deleteMedia);
+
+// ==========================================
 // FILE UPLOAD
 // ==========================================
-router.post('/upload', authenticateAdmin, upload.single('file'), (req, res) => {
+router.post('/upload', authenticateAdmin, upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
-  
-  // Return the path relative to the domain (e.g. /uploads/filename.png)
+
   const fileUrl = `/uploads/${req.file.filename}`;
-  return res.json({ 
-    message: 'File uploaded successfully', 
-    url: fileUrl 
-  });
+
+  try {
+    const media = await prisma.mediaAsset.create({
+      data: {
+        filename: req.file.filename,
+        url: fileUrl,
+        mimeType: req.file.mimetype,
+        size: req.file.size,
+        alt: req.file.originalname,
+      },
+    });
+
+    return res.json({
+      message: 'File uploaded successfully',
+      url: fileUrl,
+      media,
+    });
+  } catch (error: any) {
+    return res.json({
+      message: 'File uploaded successfully',
+      url: fileUrl,
+    });
+  }
 });
 
 export default router;

@@ -12,11 +12,8 @@ import MagneticButton from '@/components/ui/MagneticButton';
 export default function BlogDetail() {
   const params = useParams();
   const id = params?.id as string;
-
   const [blog, setBlog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
-  // Comment Form States
   const [authorName, setAuthorName] = useState('');
   const [authorEmail, setAuthorEmail] = useState('');
   const [content, setContent] = useState('');
@@ -40,31 +37,17 @@ export default function BlogDetail() {
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!authorName.trim() || !authorEmail.trim() || !content.trim()) {
       toast.error('All comment fields are required');
       return;
     }
-
     try {
       setSubmittingComment(true);
-      const newComment = await apiService.submitBlogComment(id, {
-        authorName,
-        authorEmail,
-        content,
-      });
-
-      // Update state locally
-      setBlog((prev: any) => ({
-        ...prev,
-        comments: [newComment, ...(prev.comments || [])],
-      }));
-
+      const newComment = await apiService.submitBlogComment(id, { authorName, authorEmail, content });
+      setBlog((prev: any) => ({ ...prev, comments: [newComment, ...(prev.comments || [])] }));
       toast.success('Comment posted successfully');
-      setAuthorName('');
-      setAuthorEmail('');
-      setContent('');
-    } catch (error) {
+      setAuthorName(''); setAuthorEmail(''); setContent('');
+    } catch {
       toast.error('Failed to post comment');
     } finally {
       setSubmittingComment(false);
@@ -73,170 +56,84 @@ export default function BlogDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#08080a] flex items-center justify-center">
-        <span className="text-zinc-500 text-sm tracking-wider uppercase font-medium animate-pulse">Loading article...</span>
+      <div className="flex min-h-screen items-center justify-center bg-theme theme-transition">
+        <span className="text-sm text-[var(--muted-foreground)]">Loading article...</span>
       </div>
     );
   }
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-[#08080a] flex flex-col items-center justify-center gap-6">
-        <span className="text-zinc-500 text-sm">Article not found.</span>
-        <Link href="/blogs">
-          <button className="px-5 py-2.5 rounded-full border border-zinc-800 hover:border-white text-xs font-semibold uppercase text-white transition-colors duration-200">
-            Back to blogs
-          </button>
-        </Link>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-theme theme-transition">
+        <span className="text-sm text-[var(--muted-foreground)]">Article not found.</span>
+        <Link href="/blogs" className="btn-secondary px-6 py-3 text-sm">Back to blogs</Link>
       </div>
     );
   }
 
   return (
-    <div className="relative pt-32 pb-24 overflow-hidden">
-      {/* Background glow spots */}
-      <div className="glow-spot top-[15%] left-[20%] opacity-20" />
-      <div className="glow-spot bottom-[15%] right-[10%] opacity-20" />
-
-      {/* Grid Dot Background */}
-      <div className="absolute inset-0 dot-bg opacity-30 z-0 pointer-events-none" />
-
-      <div className="mx-auto max-w-4xl px-6 md:px-12 relative z-10">
-        
-        {/* Back Link */}
-        <Link href="/blogs" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors duration-200 text-sm mb-12 group">
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
-          Back to Articles
+    <div className="bg-theme theme-transition pb-24 pt-32">
+      <div className="mx-auto max-w-3xl px-6 md:px-12">
+        <Link href="/blogs" className="mb-12 inline-flex items-center gap-2 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+          <ArrowLeft className="h-4 w-4" /> Back to Articles
         </Link>
 
-        {/* ==========================================
-            ARTICLE HEADER
-            ========================================== */}
-        <section className="mb-12">
-          <div className="flex items-center gap-3 text-xs text-zinc-500 mb-6 font-mono">
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              {new Date(blog.createdAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
-            <span className="text-[#d4af37] font-semibold uppercase">{blog.category}</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
-            <span className="flex items-center gap-1">
-              <Eye className="w-3.5 h-3.5" />
-              {blog.views} views
-            </span>
-          </div>
+        <div className="mb-6 flex items-center gap-3 text-xs text-[#999]">
+          <span className="flex items-center gap-1">
+            <Calendar className="h-3.5 w-3.5" />
+            {new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </span>
+          <span>{blog.category}</span>
+          <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{blog.views}</span>
+        </div>
 
-          <h1 className="font-display font-black text-3xl sm:text-5xl text-white tracking-tight leading-[1.1] mb-8">
-            {blog.title}
-          </h1>
+        <h1 className="text-3xl font-bold leading-tight sm:text-5xl">{blog.title}</h1>
 
-          <div className="relative aspect-[21/10] w-full overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-900 shadow-2xl">
-            <Image
-              src={blog.coverImage || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80'}
-              alt={blog.title}
-              fill
-              className="object-cover"
-              priority
-              sizes="100vw"
-            />
-          </div>
-        </section>
+        <div className="relative mt-8 aspect-[21/10] overflow-hidden rounded-2xl bg-[var(--surface-muted)]">
+          <Image
+            src={blog.coverImage || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80'}
+            alt={blog.title}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+        </div>
 
-        {/* ==========================================
-            ARTICLE BODY CONTENT
-            ========================================== */}
-        <article className="prose prose-invert prose-zinc max-w-none text-zinc-300 leading-relaxed text-base md:text-lg mb-20 border-b border-zinc-900 pb-16 whitespace-pre-line">
+        <article className="my-12 whitespace-pre-line text-base leading-relaxed text-[#444] md:text-lg">
           {blog.content}
         </article>
 
-        {/* ==========================================
-            COMMENTS SECTION
-            ========================================== */}
-        <section className="mb-20">
-          <h2 className="font-display font-bold text-2xl text-white mb-8 flex items-center gap-2.5">
-            <MessageSquare className="w-5 h-5 text-[#d4af37]" />
-            Comments ({blog.comments?.length || 0})
+        <section className="border-t border-[var(--border)] pt-12">
+          <h2 className="mb-8 flex items-center gap-2 text-xl font-semibold">
+            <MessageSquare className="h-5 w-5" /> Comments ({blog.comments?.length || 0})
           </h2>
 
-          {/* Comment Form */}
-          <form onSubmit={handleCommentSubmit} className="p-6 rounded-2xl bg-zinc-950 border border-zinc-900 mb-12">
-            <h3 className="font-bold text-sm text-white mb-6 uppercase tracking-wider">Leave a Comment</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-zinc-500 text-xs font-semibold mb-2 uppercase">Your Name</label>
-                <input
-                  type="text"
-                  value={authorName}
-                  onChange={(e) => setAuthorName(e.target.value)}
-                  className="w-full bg-zinc-900/50 border border-zinc-850 text-zinc-300 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#d4af37] transition-colors duration-200"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-zinc-500 text-xs font-semibold mb-2 uppercase">Your Email</label>
-                <input
-                  type="email"
-                  value={authorEmail}
-                  onChange={(e) => setAuthorEmail(e.target.value)}
-                  className="w-full bg-zinc-900/50 border border-zinc-850 text-zinc-300 px-4 py-2.5 rounded-xl text-sm outline-none focus:border-[#d4af37] transition-colors duration-200"
-                  required
-                />
-              </div>
+          <form onSubmit={handleCommentSubmit} className="mb-12 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
+            <div className="mb-4 grid gap-4 md:grid-cols-2">
+              <input type="text" value={authorName} onChange={(e) => setAuthorName(e.target.value)} placeholder="Your name" className="rounded-xl border border-[var(--border)] bg-theme theme-transition px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]" required />
+              <input type="email" value={authorEmail} onChange={(e) => setAuthorEmail(e.target.value)} placeholder="Your email" className="rounded-xl border border-[var(--border)] bg-theme theme-transition px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]" required />
             </div>
-
-            <div className="mb-6">
-              <label className="block text-zinc-500 text-xs font-semibold mb-2 uppercase">Comment</label>
-              <textarea
-                rows={4}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-full bg-zinc-900/50 border border-zinc-850 text-zinc-300 px-4 py-3 rounded-xl text-sm outline-none focus:border-[#d4af37] transition-colors duration-200 resize-none"
-                required
-              />
-            </div>
-
-            <MagneticButton
-              type="submit"
-              disabled={submittingComment}
-              className="px-6 py-3 bg-[#d4af37] hover:bg-[#bda02b] text-black text-xs font-bold uppercase rounded-full flex items-center gap-2 transition-colors duration-300"
-            >
-              {submittingComment ? 'Submitting...' : 'Post Comment'}
-              <Send className="w-3.5 h-3.5" />
+            <textarea rows={4} value={content} onChange={(e) => setContent(e.target.value)} placeholder="Your comment" className="mb-4 w-full resize-none rounded-xl border border-[var(--border)] bg-theme theme-transition px-4 py-3 text-sm outline-none focus:border-[var(--accent)]" required />
+            <MagneticButton type="submit" disabled={submittingComment} className="btn-primary px-6 py-3 text-sm">
+              {submittingComment ? 'Submitting...' : 'Post Comment'} <Send className="h-3.5 w-3.5" />
             </MagneticButton>
           </form>
 
-          {/* Comments List */}
-          <div className="space-y-6">
-            {blog.comments && blog.comments.length > 0 ? (
-              blog.comments.map((comment: any) => (
-                <div key={comment.id} className="p-6 rounded-xl bg-zinc-950/40 border border-zinc-900/50">
-                  <div className="flex justify-between items-center gap-4 mb-3">
-                    <span className="font-semibold text-white text-sm">{comment.authorName}</span>
-                    <span className="text-zinc-600 font-mono text-[10px]">
-                      {new Date(comment.createdAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </span>
-                  </div>
-                  <p className="text-zinc-400 text-sm leading-relaxed">{comment.content}</p>
+          <div className="space-y-4">
+            {blog.comments?.length > 0 ? blog.comments.map((comment: any) => (
+              <div key={comment.id} className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+                <div className="mb-2 flex justify-between text-sm">
+                  <span className="font-semibold">{comment.authorName}</span>
+                  <span className="text-xs text-[#999]">{new Date(comment.createdAt).toLocaleDateString()}</span>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-10 border border-dashed border-zinc-900 rounded-xl">
-                <span className="text-zinc-600 text-xs">No comments posted yet. Be the first!</span>
+                <p className="text-sm text-[var(--muted-foreground)]">{comment.content}</p>
               </div>
+            )) : (
+              <p className="py-8 text-center text-sm text-[#999]">No comments yet.</p>
             )}
           </div>
         </section>
-
       </div>
     </div>
   );

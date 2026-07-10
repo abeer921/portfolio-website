@@ -2,13 +2,14 @@ import { Request, Response } from 'express';
 import { prisma } from '../config/db';
 
 export const getAllBlogs = async (req: Request, res: Response) => {
-  const { category, tag, search, status } = req.query;
+  const { category, tag, search, status, all } = req.query;
 
   try {
     const whereClause: any = {};
 
-    // For clients, only show published posts. Admins can see all.
-    if (status) {
+    if (all === 'true') {
+      // Admin usage only — route should be protected when called with all=true
+    } else if (status) {
       whereClause.status = String(status);
     } else {
       whereClause.status = 'PUBLISHED';
