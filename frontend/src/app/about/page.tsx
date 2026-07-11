@@ -75,7 +75,6 @@ export default function About() {
             </div>
             <div className="mt-8 space-y-2 text-sm">
               <p><span className="text-[#999]">Email:</span> <a href={`mailto:${settings.contactEmail}`} className="hover:underline">{settings.contactEmail}</a></p>
-              <p><span className="text-[#999]">Phone:</span> <a href={`tel:${settings.contactPhone?.replace(/\s/g, '')}`} className="hover:underline">{settings.contactPhone}</a></p>
             </div>
           </div>
         </section>

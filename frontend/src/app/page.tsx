@@ -179,12 +179,6 @@ export default function Home() {
             <FadeIn delay={0.12}>
               <div className="about-home-contact">
                 <div>
-                  <p className="about-home-contact-label">Call Today :</p>
-                  <a href={`tel:${settings.contactPhone?.replace(/\s/g, '')}`} className="about-home-contact-value interactive-cursor">
-                    {settings.contactPhone}
-                  </a>
-                </div>
-                <div>
                   <p className="about-home-contact-label">Email :</p>
                   <a href={`mailto:${settings.contactEmail}`} className="about-home-contact-value interactive-cursor">
                     {settings.contactEmail}

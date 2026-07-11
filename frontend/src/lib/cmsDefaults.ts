@@ -10,7 +10,7 @@ export const cmsDefaults = {
     heroSecondaryCtaLabel: 'Download Resume',
     resumeUrl: '/resume/abeer-nisar-resume.pdf',
     contactEmail: 'abeernisar11@gmail.com',
-    contactPhone: '+92 302 4115583',
+    contactPhone: '',
     contactLocation: 'Lahore, Pakistan',
     workingHours: 'Mon - Fri: 9 AM - 6 PM',
     footerGreeting: 'Hi',

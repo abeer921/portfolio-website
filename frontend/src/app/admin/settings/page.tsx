@@ -145,16 +145,6 @@ export default function AdminSettings() {
                 required
               />
             </div>
-            <div>
-              <label className="block text-zinc-500 font-semibold mb-2 uppercase">Contact Phone</label>
-              <input
-                type="text"
-                value={settings.contactPhone}
-                onChange={(e) => setSettings({ ...settings, contactPhone: e.target.value })}
-                className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
-                required
-              />
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

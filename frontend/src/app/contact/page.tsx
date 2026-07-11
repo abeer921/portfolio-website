@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, MapPin, Clock, Send, CheckCircle2 } from 'lucide-react';
 import { apiService } from '@/services/apiService';
 import MagneticButton from '@/components/ui/MagneticButton';
 import { useCms } from '@/context/CmsContext';
@@ -47,7 +47,6 @@ export default function Contact() {
 
   const contactInfo = [
     { title: 'Email', value: settings.contactEmail, href: `mailto:${settings.contactEmail}`, icon: Mail },
-    { title: 'Phone', value: settings.contactPhone, href: `tel:${settings.contactPhone?.replace(/\s/g, '')}`, icon: Phone },
     { title: 'Location', value: settings.contactLocation, icon: MapPin },
     { title: 'Hours', value: settings.workingHours, icon: Clock },
   ];

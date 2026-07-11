@@ -78,7 +78,7 @@ export default function AdminNavigation() {
         </Section>
 
         <Section title="Contact Info">
-          {['contactEmail', 'contactPhone', 'contactLocation', 'workingHours'].map((key) => (
+          {['contactEmail', 'contactLocation', 'workingHours'].map((key) => (
             <Field key={key} label={key} value={String(settings[key] || '')} onChange={(v) => setSettings((p) => ({ ...p, [key]: v }))} />
           ))}
         </Section>

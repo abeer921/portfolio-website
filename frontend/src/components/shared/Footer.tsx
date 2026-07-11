@@ -17,7 +17,6 @@ export default function Footer() {
   const tagline = settings.tagline || 'UI/UX designer crafting meaningful digital experiences.';
   const greeting = settings.footerGreeting || 'Hi';
   const contactEmail = settings.contactEmail || 'abeernisar11@gmail.com';
-  const contactPhone = settings.contactPhone || '+92 302 4115583';
   const contactLocation = settings.contactLocation || 'Lahore, Pakistan';
   const copyright = settings.copyrightText || `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`;
 
@@ -53,9 +52,6 @@ export default function Footer() {
             <div className="text-sm text-[var(--muted-foreground)]">
               <a href={`mailto:${contactEmail}`} className="block transition-colors hover:text-[var(--foreground)]">
                 {contactEmail}
-              </a>
-              <a href={`tel:${contactPhone.replace(/\s/g, '')}`} className="mt-2 block transition-colors hover:text-[var(--foreground)]">
-                {contactPhone}
               </a>
               <p className="mt-4 text-xs">{contactLocation}</p>
             </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X, Mail, Phone } from 'lucide-react';
+import { Menu, X, Mail } from 'lucide-react';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { ObermannLogo } from '@/components/ui/ObermannMark';
 import { useTheme } from '@/context/ThemeContext';
@@ -25,7 +25,6 @@ export default function Navbar() {
     : defaultNav) as { name: string; path: string }[];
   const brandName = settings.brandName || 'Abeer Nisar';
   const contactEmail = settings.contactEmail || 'abeernisar11@gmail.com';
-  const contactPhone = settings.contactPhone || '+92 302 4115583';
   const onHero = !scrolled;
   const useSolidHeader = scrolled;
 
@@ -93,9 +92,6 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <a href={`mailto:${contactEmail}`} className={`interactive-cursor hidden sm:block ${iconCls}`} aria-label="Email">
               <Mail className="h-4 w-4" />
-            </a>
-            <a href={`tel:${contactPhone.replace(/\s/g, '')}`} className={`interactive-cursor hidden sm:block ${iconCls}`} aria-label="Phone">
-              <Phone className="h-4 w-4" />
             </a>
             <span className={`hidden h-4 w-px sm:block ${dividerCls}`} />
             <ThemeToggle onHero={onHero} />
