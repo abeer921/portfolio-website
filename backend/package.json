@@ -10,7 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:seed": "ts-node src/config/seed.ts"
+    "prisma:seed": "ts-node src/config/seed.ts",
+    "prisma:update-projects": "ts-node src/config/updateProjects.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.12.1",

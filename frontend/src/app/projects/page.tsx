@@ -6,7 +6,7 @@ import { fallbackData } from '@/services/apiService';
 import FeaturedProjectsStack from '@/components/shared/FeaturedProjectsStack';
 import { useCms } from '@/context/CmsContext';
 
-const categories = ['All', 'UI/UX Design', 'Web Design', 'Mobile Design', 'Full Stack Development'];
+const categories = ['All', 'SaaS Product Design'];
 
 export default function Projects() {
   const { cms, loading: cmsLoading } = useCms();
@@ -43,8 +43,8 @@ export default function Projects() {
         <section className="mb-10">
           <h1 className="featured-stack-heading">All Projects</h1>
           <p className="featured-stack-intro !mb-0">
-            A curated selection of digital products, interactive prototypes, and web design work —
-            scroll through each project as a stacked case study.
+            A curated selection of SaaS product design work — dashboards, workflows, and
+            analytics platforms scroll through as stacked case studies.
           </p>
         </section>
 

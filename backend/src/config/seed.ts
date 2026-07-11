@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { SAAS_PROJECTS } from './saasProjects';
 
 const prisma = new PrismaClient();
 
@@ -222,86 +223,9 @@ async function main() {
   });
   console.log('Services seeded');
 
-  // 8. Seed Projects (Case studies from resume)
+  // 8. Seed Projects (SaaS portfolio)
   await prisma.project.createMany({
-    data: [
-      {
-        title: 'EAS Tailor Management System Dashboard',
-        category: 'UI/UX Design',
-        description: 'A comprehensive, modern UI/UX dashboard designed for a premium groom shop management system, optimizing workflow, inventory, and client tracking for staff operations.',
-        techStack: ['Figma', 'UX Research', 'Information Architecture', 'Design System'],
-        problem: 'Shop managers were overwhelmed with physical spreadsheets and manual records. Client orders, measurements, fabric choices, and tailor assignments were frequently mismatched, leading to late orders and poor customer satisfaction.',
-        solution: 'Designed a highly clean, dark-mode dashboard focused on staff productivity. Key features include quick measurement entry forms, interactive order statuses, real-time tailor scheduling, and automated low-fabric inventory alerts.',
-        caseStudy: 'EAS Tailor Management System was built after speaking directly with tailoring staff in Lahore. I drafted user journey maps and wireframes focusing on high-frequency actions: measuring a client and checking tailor status. In the design system, I selected dark, rich slate tones to align with a luxury tailoring brand while maximizing visibility.',
-        designProcess: '1. Research: Interviews with tailor managers. 2. Wireframing: High-contrast layouts for client profile sheets. 3. Visual Identity: Sleek minimalist dark aesthetics with subtle copper highlights. 4. Prototyping: Fully functional micro-interactions for adding client measurements.',
-        images: [
-          'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
-          'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80'
-        ],
-        liveDemo: '#',
-        figma: 'https://figma.com/file/sample-eas-tailor',
-        client: 'EAS Accounting Software',
-        duration: '2 Months',
-        status: 'Completed',
-        featured: true,
-        position: 1
-      },
-      {
-        title: 'E-Learning Platform System UI',
-        category: 'UI/UX Design',
-        description: 'Final Year Project. UI design and system structure for a comprehensive online education portal, featuring student dashboards, course progressions, and admin grading modules.',
-        techStack: ['Figma', 'UX Research', 'Wireframing', 'Interactive Prototyping'],
-        problem: 'Traditional learning systems are cluttered and confusing for students. Key navigation panels are hidden, leading to low completion rates and course dropouts.',
-        solution: 'Created a distraction-free, minimalist study interface. Added persistent side navigation, modular progress indicators, and visual achievement badges that increase student engagement.',
-        caseStudy: 'For my final year project, I analyzed popular portals. We designed separate user flows for Students, Instructors, and Administrators. By applying strict visual hierarchy, students can resume a video lesson in a single click from the home screen.',
-        designProcess: '1. Competitor Analysis: Studied Coursera and Udemy. 2. User Flows: Built maps for course registration and quiz completion. 3. UI Kits: Reusable cards for courses, notifications, and analytics. 4. Prototyping: Interactive video player panel.',
-        images: [
-          'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80',
-          'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&w=800&q=80'
-        ],
-        liveDemo: '#',
-        github: 'https://github.com/abeernisar/learning-platform',
-        client: 'University of Education',
-        duration: '4 Months',
-        status: 'Completed',
-        featured: true,
-        position: 2
-      },
-      {
-        title: 'Gift Shop E-Commerce Website',
-        category: 'Web Design',
-        description: 'An elegant, clean e-commerce experience designed with warm visual tones, fluid navigation, and a modern checkout process.',
-        techStack: ['Figma', 'Visual Hierarchy', 'Responsive Layouts', 'E-commerce UI'],
-        problem: 'Local gift shop websites are visually overwhelming, making it hard to find curated gifts or select appropriate packaging option combinations.',
-        solution: 'Developed a serene layout with generous whitespace, intuitive filters by recipient/occasion, and an interactive "build a gift box" flow.',
-        images: [
-          'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=800&q=80'
-        ],
-        liveDemo: '#',
-        figma: 'https://figma.com/file/giftshop',
-        duration: '1 Month',
-        status: 'Completed',
-        featured: false,
-        position: 3
-      },
-      {
-        title: 'Social Media Mobile App Concept',
-        category: 'Mobile Design',
-        description: 'A mobile user interface focused on content-driven feed layouts, user profiles, and clean typography alignment.',
-        techStack: ['Figma', 'Mobile UI Guidelines', 'Interactive Components'],
-        problem: 'Mobile feeds are often cluttered with advertisements and complex UI borders, hindering post readability.',
-        solution: 'Designed borderless content blocks and context-aware action items that slide out, creating a highly minimalist reading environment.',
-        images: [
-          'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80'
-        ],
-        liveDemo: '#',
-        figma: 'https://figma.com/file/socialapp',
-        duration: '3 Weeks',
-        status: 'Completed',
-        featured: false,
-        position: 4
-      }
-    ]
+    data: SAAS_PROJECTS,
   });
   console.log('Projects seeded');
 

@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
+const isVercel = process.env.VERCEL === "1";
+
 const nextConfig: NextConfig = {
   async rewrites() {
+    if (isVercel) return [];
+
     return [
       {
         source: "/api/:path*",

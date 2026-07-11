@@ -15,7 +15,7 @@ export default function AdminProjects() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentProject, setCurrentProject] = useState<any>({
     title: '',
-    category: 'UI/UX Design',
+    category: 'SaaS Product Design',
     description: '',
     techStack: [],
     problem: '',
@@ -60,7 +60,7 @@ export default function AdminProjects() {
   const handleNewClick = () => {
     setCurrentProject({
       title: '',
-      category: 'UI/UX Design',
+      category: 'SaaS Product Design',
       description: '',
       techStack: [],
       problem: '',
@@ -223,10 +223,7 @@ export default function AdminProjects() {
                       onChange={(e) => setCurrentProject({ ...currentProject, category: e.target.value })}
                       className="w-full bg-zinc-900/50 border border-zinc-850 text-white px-4 py-2.5 rounded-xl outline-none focus:border-[#8B5CF6] transition-all"
                     >
-                      <option>UI/UX Design</option>
-                      <option>Web Design</option>
-                      <option>Mobile Design</option>
-                      <option>Full Stack Development</option>
+                      <option>SaaS Product Design</option>
                     </select>
                   </div>
                 </div>

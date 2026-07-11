@@ -56,7 +56,7 @@ export const cmsDefaults = {
     },
     'home.featuredProjects': {
       title: 'Featured Projects',
-      intro: 'These selected projects reflect my passion for blending strategy with creativity — solving real problems through thoughtful design and impactful storytelling.',
+      intro: 'Selected SaaS product design work — dashboards, workflows, and analytics platforms built to solve real user problems.',
       browseAllLabel: 'Browse All Projects',
     },
     'home.testimonials': {
