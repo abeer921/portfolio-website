@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { neon } from '@neondatabase/serverless';
 import { sendContactMessageNotification } from '@/lib/contactEmail';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+type MessageRow = {
+  id: string;
+  name: string;
+  email: string;
+  subject: string | null;
+  message: string;
+  isRead: boolean;
+  createdAt: Date;
+};
 
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
@@ -27,7 +37,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'Please enter a valid email address' }, { status: 400 });
   }
 
-  if (!process.env.DATABASE_URL) {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
     return NextResponse.json(
       { message: 'Server is missing database configuration. Please try again later.' },
       { status: 503 }
@@ -35,23 +46,24 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const msg = await prisma.message.create({
-      data: {
-        name: cleanName,
-        email: cleanEmail,
-        subject: cleanSubject || null,
-        message: cleanMessage,
-      },
-    });
+    const sql = neon(databaseUrl);
 
-    const settings = await prisma.settings.findUnique({
-      where: { id: 'global' },
-      select: { contactEmail: true },
-    });
+    const inserted = await sql`
+      INSERT INTO "Message" (id, name, email, subject, message, "isRead", "createdAt")
+      VALUES (gen_random_uuid()::text, ${cleanName}, ${cleanEmail}, ${cleanSubject || null}, ${cleanMessage}, false, NOW())
+      RETURNING id, name, email, subject, message, "isRead", "createdAt"
+    `;
+
+    const msg = inserted[0] as MessageRow;
+
+    const settingsRows = await sql`
+      SELECT "contactEmail" FROM "Settings" WHERE id = 'global' LIMIT 1
+    `;
+    const contactEmail = settingsRows[0]?.contactEmail as string | undefined;
 
     let emailNotificationSent = false;
     try {
-      emailNotificationSent = await sendContactMessageNotification(msg, settings?.contactEmail);
+      emailNotificationSent = await sendContactMessageNotification(msg, contactEmail);
     } catch (emailError) {
       console.error('Contact email notification failed:', emailError);
     }

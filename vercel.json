@@ -3,18 +3,9 @@
     "frontend": {
       "root": "frontend",
       "framework": "nextjs"
-    },
-    "backend": {
-      "root": "backend",
-      "framework": "express",
-      "buildCommand": "npm install && npx prisma generate && npx prisma db push && npm run build"
     }
   },
   "rewrites": [
-    { "source": "/api/messages", "destination": { "service": "frontend" } },
-    { "source": "/api/(.*)", "destination": { "service": "backend" } },
-    { "source": "/uploads/(.*)", "destination": { "service": "backend" } },
-    { "source": "/health", "destination": { "service": "backend" } },
     { "source": "/(.*)", "destination": { "service": "frontend" } }
   ]
 }

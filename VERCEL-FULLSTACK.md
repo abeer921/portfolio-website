@@ -27,7 +27,16 @@ Your Neon database stays the same — just add its URL to Vercel.
 
 4. **Remove** `NEXT_PUBLIC_API_URL` if it points to `localhost` — the frontend uses `/api` on the same domain automatically.
 
-## Step 2: Redeploy
+## Step 2: Deploy to Production
+
+After pushing code, go to **Deployments** in Vercel:
+
+1. Find the latest **Production** deployment from `main` (not an old "Redeploy")
+2. If only Preview is updated, click the latest Preview → **Promote to Production**
+
+Or push to `main` and wait for the automatic Production build to finish with **Ready** status.
+
+## Step 3: Redeploy
 
 1. Go to **Deployments**
 2. Click **...** on the latest deployment → **Redeploy**
