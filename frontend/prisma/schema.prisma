@@ -1,0 +1,199 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  name        String
+  bio         String?
+  avatar      String?
+  githubUrl   String?
+  linkedinUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id            String   @id @default(uuid())
+  title         String
+  category      String
+  description   String
+  techStack     String[]
+  problem       String?
+  solution      String?
+  caseStudy     String?
+  designProcess String?
+  images        String[]
+  videoUrl      String?
+  liveDemo      String?
+  github        String?
+  figma         String?
+  behance       String?
+  duration      String?
+  client        String?
+  status        String   @default("Completed") // e.g. Completed, In Progress
+  featured      Boolean  @default(false)
+  position      Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Blog {
+  id         String    @id @default(uuid())
+  title      String
+  content    String
+  category   String
+  tags       String[]
+  coverImage String?
+  status     String    @default("DRAFT") // DRAFT, PUBLISHED
+  views      Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  comments   Comment[]
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  authorName  String
+  authorEmail String
+  content     String
+  blogId      String
+  blog        Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model Experience {
+  id               String   @id @default(uuid())
+  company          String
+  role             String
+  location         String?
+  startDate        String
+  endDate          String?  // null if current
+  responsibilities String[]
+  achievements     String[]
+  current          Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Skill {
+  id        String   @id @default(uuid())
+  name      String
+  category  String   // e.g. Frontend, Backend, UI UX, Tools, Soft Skills, Languages
+  level     Int      // 0 to 100
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Certificate {
+  id            String   @id @default(uuid())
+  title         String
+  issuer        String
+  issueDate     String
+  credentialUrl String?
+  image         String?
+  createdAt     DateTime @default(now())
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  clientName  String
+  clientPhoto String?
+  clientRole  String?
+  company     String?
+  review      String
+  rating      Int      @default(5)
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model Service {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  icon         String?
+  price        String?
+  num          String?
+  previewImage String?
+  items        String[] @default([])
+  faqs         Json     @default("[]")
+  position     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id              String   @id @default("global")
+  brandName       String   @default("Abeer Nisar")
+  tagline         String   @default("UI/UX designer crafting meaningful digital experiences.")
+  heroEyebrow     String   @default("UI/UX DESIGNER • PRODUCT DESIGNER")
+  heroTitle       String   @default("Turning Ideas Into Beautiful &\nFunctional Products.")
+  heroSubtitle    String   @default("I'm Abeer Nisar, a UI/UX Designer passionate about creating intuitive interfaces\nwhile exploring AI-powered products that combine creativity, technology, and\nmeaningful user experiences.")
+  heroCtaLabel    String   @default("View My Work")
+  heroCtaHref      String   @default("/projects")
+  heroSecondaryCtaLabel String @default("Download Resume")
+  resumeUrl       String?
+  contactEmail    String   @default("abeernisar11@gmail.com")
+  contactPhone    String   @default("+92 302 4115583")
+  contactLocation String   @default("Lahore, Pakistan")
+  workingHours    String   @default("Mon - Fri: 9 AM - 6 PM")
+  metaTitle       String   @default("Abeer Nisar | Premium Portfolio")
+  metaDescription String   @default("Creative UI/UX Designer and Frontend Engineer portfolio.")
+  metaKeywords    String[]
+  ogImage         String?
+  primaryColor    String   @default("#d4af37")
+  secondaryColor  String   @default("#121212")
+  themeMode       String   @default("dark")
+  socialLinks     Json     @default("[]")
+  navItems        Json     @default("[]")
+  footerLinks     Json     @default("[]")
+  footerGreeting  String   @default("Hi")
+  copyrightText   String?
+  updatedAt       DateTime @updatedAt
+}
+
+model SiteContent {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  content   Json
+  updatedAt DateTime @updatedAt
+}
+
+model Education {
+  id        String   @id @default(uuid())
+  degree    String
+  school    String
+  duration  String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model MediaAsset {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  alt       String?
+  createdAt DateTime @default(now())
+}

@@ -23,6 +23,8 @@ Your Neon database stays the same — just add its URL to Vercel.
 | `DATABASE_URL` | Your Neon connection string (same as `backend/.env`) |
 | `JWT_SECRET` | Any long random secret string |
 
+**`DATABASE_URL` is required for the contact form** — without it, message submissions fail on the live site.
+
 4. **Remove** `NEXT_PUBLIC_API_URL` if it points to `localhost` — the frontend uses `/api` on the same domain automatically.
 
 ## Step 2: Redeploy
