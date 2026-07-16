@@ -37,7 +37,7 @@ function normalizeContent(content: Record<string, unknown>) {
   if (aboutHome && typeof aboutHome === 'object') {
     const about = { ...(aboutHome as Record<string, unknown>) };
     about.portraitImage =
-      resolveImageUrl(String(about.portraitImage || '')) || '/images/about/abeer-portrait.jpg';
+      resolveImageUrl(String(about.portraitImage || '')) || '/images/about/portrait.jpg';
     next['home.about'] = about;
   }
 
@@ -52,8 +52,9 @@ function normalizeContent(content: Record<string, unknown>) {
   const aboutPage = next['about.page'];
   if (aboutPage && typeof aboutPage === 'object') {
     const page = { ...(aboutPage as Record<string, unknown>) };
+    const resolved = resolveImageUrl(String(page.heroImage || ''));
     page.heroImage =
-      resolveImageUrl(String(page.heroImage || '')) || '/images/about/abeer-portrait.jpg';
+      resolved.startsWith('/images/about/') ? resolved : '/images/about/portrait.jpg';
     next['about.page'] = page;
   }
 

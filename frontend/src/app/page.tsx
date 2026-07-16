@@ -76,7 +76,7 @@ export default function Home() {
   const servicesMainImage =
     resolveImageUrl(servicesSection.mainImage) || '/images/services/main.jpg';
   const aboutPortrait =
-    resolveImageUrl(about.portraitImage) || '/images/about/abeer-portrait.jpg';
+    resolveImageUrl(about.portraitImage) || '/images/about/portrait.jpg';
   const aboutBioParagraphs = Array.isArray(about.bio)
     ? about.bio.filter(Boolean)
     : String(about.bio || '')
@@ -150,7 +150,6 @@ export default function Home() {
                   loading="eager"
                   decoding="async"
                 />
-                <span className="about-home-image-dot" aria-hidden />
               </div>
             </div>
           </FadeIn>

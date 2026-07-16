@@ -23,7 +23,13 @@ export default function About() {
     ctaLabel?: string;
   }>('about.page');
   const settings = cms.settings as Record<string, string>;
-  const aboutPortrait = resolveImageUrl(page.heroImage) || DEFAULT_ABOUT_PORTRAIT;
+  const homeAbout = getContent<{ portraitImage?: string }>('home.about');
+  const resolvedHero = resolveImageUrl(page.heroImage);
+  const resolvedHome = resolveImageUrl(homeAbout.portraitImage);
+  const aboutPortrait =
+    (resolvedHero.startsWith('/images/about/') && resolvedHero) ||
+    (resolvedHome.startsWith('/images/about/') && resolvedHome) ||
+    DEFAULT_ABOUT_PORTRAIT;
 
   const experiences = (cms.experiences as typeof fallbackData.experiences).length
     ? (cms.experiences as typeof fallbackData.experiences)
@@ -65,7 +71,6 @@ export default function About() {
                 loading="eager"
                 decoding="async"
               />
-              <span className="about-home-image-dot" aria-hidden />
             </div>
           </div>
           <div>

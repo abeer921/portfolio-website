@@ -43,7 +43,7 @@ export const cmsDefaults = {
         { value: '4', label: 'Completed Projects' },
         { value: '5+', label: 'Clients Worldwide' },
       ],
-      portraitImage: '/images/about/abeer-portrait.jpg',
+      portraitImage: '/images/about/portrait.jpg',
       ctaLabel: 'My Story',
       ctaHref: '/about',
     },

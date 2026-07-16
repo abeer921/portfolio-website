@@ -334,7 +334,6 @@ export default function ServicesAboutImageMorph({
           <div className="services-about-flip-face services-about-flip-face--back">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={aboutImageSrc} alt="" className="services-about-flip-image" loading="lazy" decoding="async" />
-            <span className="about-home-image-dot services-about-flip-dot" />
           </div>
         </div>
       </div>

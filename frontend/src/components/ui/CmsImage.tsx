@@ -6,7 +6,7 @@ type CmsImageProps = Omit<ImageProps, 'src'> & {
   fallback?: string;
 };
 
-export default function CmsImage({ src, fallback = '/images/about/abeer-portrait.jpg', alt, ...props }: CmsImageProps) {
+export default function CmsImage({ src, fallback = '/images/about/portrait.jpg', alt, ...props }: CmsImageProps) {
   const resolved = resolveImageUrl(src) || fallback;
 
   return <Image src={resolved} alt={alt} {...props} />;

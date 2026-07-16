@@ -10,9 +10,9 @@ const LOCAL_IMAGE_FALLBACKS: Record<string, string> = {
   'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80':
     '/images/contact/cta-background.jpg',
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80':
-    '/images/about/abeer-portrait.jpg',
+    '/images/about/portrait.jpg',
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&q=80':
-    '/images/about/abeer-portrait.jpg',
+    '/images/about/portrait.jpg',
   'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80':
     '/images/blogs/minimalist-uiux.jpg',
   'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80':
@@ -37,7 +37,7 @@ const UNSPLASH_PHOTO_FALLBACKS: Record<string, string> = {
   'photo-1507003211169-0a1dd7228f2d': '/images/testimonials/waseem-khan.jpg',
   'photo-1500648767791-00dcc994a43e': '/images/testimonials/sardar-azam.jpg',
   'photo-1497366216548-37526070297c': '/images/contact/cta-background.jpg',
-  'photo-1534528741775-53994a69daeb': '/images/about/abeer-portrait.jpg',
+  'photo-1534528741775-53994a69daeb': '/images/about/portrait.jpg',
   'photo-1618005182384-a83a8bd57fbe': '/images/blogs/minimalist-uiux.jpg',
   'photo-1531482615713-2afd69097998': '/images/blogs/design-handoff.jpg',
   'photo-1513258496099-48168024aec0': '/images/certificates/seo-graphic-design.jpg',
@@ -75,7 +75,7 @@ const UPLOAD_HINTS: Array<{ match: RegExp; path: string }> = [
   { match: /waseem/i, path: '/images/testimonials/waseem-khan.jpg' },
   { match: /sardar/i, path: '/images/testimonials/sardar-azam.jpg' },
   { match: /cta|contact|footer|work-together/i, path: '/images/contact/cta-background.jpg' },
-  { match: /portrait|about|hero|abeer/i, path: '/images/about/abeer-portrait.jpg' },
+  { match: /portrait|about|hero|abeer/i, path: '/images/about/portrait.jpg' },
   { match: /minimal|uiux|ui-ux/i, path: '/images/blogs/minimalist-uiux.jpg' },
   { match: /handoff|mern|developer/i, path: '/images/blogs/design-handoff.jpg' },
   { match: /seo|graphic/i, path: '/images/certificates/seo-graphic-design.jpg' },
@@ -139,8 +139,8 @@ export function resolveImageUrl(url?: string | null) {
   if (!trimmed) return '';
 
   if (trimmed.startsWith('/images/')) {
-    if (trimmed === '/images/about/portrait.jpg') {
-      return '/images/about/abeer-portrait.jpg';
+    if (trimmed === '/images/about/abeer-portrait.jpg') {
+      return '/images/about/portrait.jpg';
     }
     return normalizeProjectImagePath(trimmed);
   }
@@ -183,5 +183,5 @@ export const DEFAULT_TESTIMONIAL_PHOTOS = {
 } as const;
 
 export const DEFAULT_CONTACT_CTA_BACKGROUND = '/images/contact/cta-background.jpg';
-export const DEFAULT_ABOUT_PORTRAIT = '/images/about/abeer-portrait.jpg';
+export const DEFAULT_ABOUT_PORTRAIT = '/images/about/portrait.jpg';
 export const DEFAULT_BLOG_COVER = '/images/blogs/minimalist-uiux.jpg';

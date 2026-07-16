@@ -11,7 +11,7 @@ const defaultSiteContent: Record<string, unknown> = {
       { value: '4', label: 'Completed Projects' },
       { value: '5+', label: 'Clients Worldwide' },
     ],
-    portraitImage: '/images/about/abeer-portrait.jpg',
+    portraitImage: '/images/about/portrait.jpg',
     ctaLabel: 'My Story',
     ctaHref: '/about',
   },
@@ -60,7 +60,7 @@ const defaultSiteContent: Record<string, unknown> = {
     backgroundImage: '/images/contact/cta-background.jpg',
   },
   'about.page': {
-    heroImage: '/images/about/abeer-portrait.jpg',
+    heroImage: '/images/about/portrait.jpg',
     heading: 'About me',
     bio: [
       "Hi, I'm Abeer — a UI/UX designer passionate about crafting meaningful and impactful digital experiences for ambitious brands and startups.",
